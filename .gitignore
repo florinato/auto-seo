@@ -1,0 +1,31 @@
+# Archivos y directorios ignorados por Git
+
+# Archivos de Python
+*.pyc
+__pycache__/
+
+# Archivos de base de datos
+*.db
+
+# Archivos temporales y de caché
+.DS_Store
+.pytest_cache/
+
+# Entornos virtuales
+venv/
+.venv/
+
+# Archivos de configuración y secretos
+.env
+
+# Archivos generados por el IDE
+.idea/
+*.iml
+
+# Archivos de logs
+*.log
+
+# Otros archivos
+aplicaciones_médicas_de_la_IA_preview.html
+avances_de_la_IA_en_medicina_2025_preview.html
+seo_autopilot.db
