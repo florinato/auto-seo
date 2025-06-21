@@ -1,6 +1,6 @@
 # Informe del Proyecto: Asistente de Contenido Inteligente (ACI)
 
-## Título Completo: Asistente de Contenido Inteligente (ACI): Automatización Estratégica de SEO y Creación de Contenido Asistida por IA.
+## Asistente de Contenido Inteligente (ACI): Automatización Estratégica de SEO y Creación de Contenido Asistida por IA.
 
 ### 1. Resumen Ejecutivo
 
@@ -82,7 +82,7 @@ El Asistente de Contenido Inteligente (ACI) no es solo un generador; es un ecosi
 He integrado los siguientes puntos:
 
 *   ACI no solo crea contenido, sino que automatiza funciones SEO clave.
-*   Actúa como guía para usuarios sin conocimientos SEO, explicando por qué las optimizaciones son importantes y las estrategias detrás de ellas.
+*   Actúa como guía para usuarios sin conocimientos SEO, explicando por qué las optimizaciones son importantes y las     estrategias detrás de ellas.
 *   La automatización abarca el SEO *on-page* y de contenido.
 *   La IA analiza y sugiere optimizaciones adicionales.
 *   Las plantillas de prompt personalizables para el analyzer permiten refinar los criterios de evaluación (como ponderar fiabilidad vs. otros factores).

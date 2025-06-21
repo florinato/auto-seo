@@ -6,11 +6,10 @@ import os  # Importar os para construir rutas de archivo
 import re
 from datetime import datetime
 
+import database
 import llm_client
 import mock_publisher
 import web_tools
-
-import database
 
 
 def generate_seo_content(topic, num_sources=3, min_score=7):
@@ -153,7 +152,7 @@ if __name__ == "__main__":
         exit(1)
 
     # Define el tema para probar. Asegúrate de tener fuentes sobre él con score >= min_score no usadas.
-    test_topic = "ultimas noticias sobre la guerra en Ucrania"
+    test_topic = "panot de barcelona"
 
     test_num_sources = 3
     test_min_score = 7

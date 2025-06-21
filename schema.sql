@@ -54,3 +54,24 @@ CREATE TABLE IF NOT EXISTS imagenes_generadas (
     autor TEXT,
     FOREIGN KEY (articulo_generado_id) REFERENCES articulos_generados(id)
 );
+
+-- Nueva Tabla: Configuracion por Tema y Prompts
+CREATE TABLE IF NOT EXISTS configuracion (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tema TEXT UNIQUE NOT NULL, -- El TEMA al que aplica esta configuración
+    min_score_fuente INTEGER DEFAULT 5, -- Score mínimo para fuentes en Fase 1 (Scraper)
+    num_fuentes_scraper INTEGER DEFAULT 10, -- Cuántas fuentes intentar buscar en Fase 1
+    num_resultados_scraper INTEGER DEFAULT 5, -- Cuántas fuentes analizar y considerar guardar en Fase 1
+    min_score_generador INTEGER DEFAULT 7, -- Score mínimo para fuentes a USAR en Fase 2 (Generador)
+    num_fuentes_generador INTEGER DEFAULT 3, -- Cuántas fuentes USAR en Fase 2
+    longitud_texto TEXT DEFAULT 'media', -- 'corta', 'media', 'larga' para el generador
+    tono_texto TEXT DEFAULT 'neutral', -- 'formal', 'informal', etc. para el generador
+    num_imagenes_buscar INTEGER DEFAULT 2, -- Cuántas imágenes buscar para el generado
+    -- Plantillas de Prompt (TEXT para almacenar strings largos)
+    prompt_analyzer_template TEXT, -- Plantilla para el prompt de análisis de fuentes
+    prompt_generator_template TEXT, -- Plantilla para el prompt de generación de texto
+    prompt_copilot_template TEXT, -- Plantilla base para la conversación con el Copiloto
+    -- Otros campos de configuración específicos que puedan surgir
+    fecha_creacion TEXT DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TEXT DEFAULT CURRENT_TIMESTAMP
+);

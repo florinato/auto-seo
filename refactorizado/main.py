@@ -1,10 +1,9 @@
 # main.py
 # Punto de entrada principal. Orquesta solo la fase de búsqueda, análisis y guardado de fuentes.
 
-import scraper
-
 # Importamos los módulos necesarios
 import database
+import scraper
 
 # analyzer y llm_client son usados internamente por scraper y analyzer,
 # no necesitan importarse aquí directamente para la estructura deseada.
@@ -16,7 +15,7 @@ if __name__ == "__main__":
 
     # Definir los temas para buscar fuentes
     # Puedes cambiar este tema si ya tienes muchas fuentes sobre él
-    temas = ["ultimas noticias sobre la guerra en Ucrania"]
+    temas = ["'panot'de barcelona"] # Tema original del ejemplo
     # Ejemplo con otro tema: temas = ["tendencias en robótica educativa 2024"]s
 
 
