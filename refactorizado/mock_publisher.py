@@ -76,7 +76,7 @@ def publish_to_html(article_data, image_data=None, filename=None):
                            image_html += ' (' + ' | '.join(caption_parts) + ')'
                       image_html += '</figcaption>\n'
                  elif caption_parts:
-                      image_html += f'<figcaption style="text-align: center; font-size: 0.9em; color: #555; margin-top: 10px; line-height: 1.4;">{' | '.join(caption_parts)}</figcaption>\n'
+                      image_html += f'<figcaption style="text-align: center; font-size: 0.9em; color: #555; margin-top: 10px; line-height: 1.4;">{" | ".join(caption_parts)}</figcaption>\n'
 
             image_html += '</figure>\n'
         else:

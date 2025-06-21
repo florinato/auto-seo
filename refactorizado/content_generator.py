@@ -152,7 +152,7 @@ if __name__ == "__main__":
         exit(1)
 
     # Define el tema para probar. Asegúrate de tener fuentes sobre él con score >= min_score no usadas.
-    test_topic = "panot de barcelona"
+    test_topic = "ultimas novedades en astronomia 2025"
 
     test_num_sources = 3
     test_min_score = 7
