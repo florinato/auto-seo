@@ -587,10 +587,146 @@ def get_available_temas_secciones():
     finally:
         conn.close()
 
+# === Funciones para la tabla generacion_tareas ===
+
+def crear_tarea_generacion(tema: str, configuracion_id: int = None) -> int:
+    """Crea una nueva tarea de generación en estado 'pendiente' y devuelve su ID."""
+    conn = sqlite3.connect(DB_FILE_PATH)
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            INSERT INTO generacion_tareas (tema, configuracion_id, estado, fecha_actualizacion)
+            VALUES (?, ?, 'pendiente', CURRENT_TIMESTAMP)
+        ''', (tema, configuracion_id))
+        tarea_id = cursor.lastrowid
+        conn.commit()
+        print(f"✅ Tarea de generación creada con ID {tarea_id} para tema '{tema}'.")
+        return tarea_id
+    except sqlite3.OperationalError as e:
+        print(f"⚠️ Error SQL en crear_tarea_generacion: {str(e)}. ¿Existe la tabla 'generacion_tareas'?")
+        conn.rollback()
+        raise
+    except Exception as e:
+        print(f"❌ Error al crear tarea de generación para tema '{tema}': {str(e)}")
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+def obtener_siguiente_tarea_pendiente() -> dict | None:
+    """Obtiene la tarea pendiente más antigua (FIFO)."""
+    conn = sqlite3.connect(DB_FILE_PATH)
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            SELECT * FROM generacion_tareas
+            WHERE estado = 'pendiente'
+            ORDER BY fecha_solicitud ASC
+            LIMIT 1
+        ''')
+        row = cursor.fetchone()
+        if row:
+            col_names = [description[0] for description in cursor.description]
+            print(f"✅ Siguiente tarea pendiente encontrada: ID {row[0]}")
+            return dict(zip(col_names, row))
+        else:
+            # print("ℹ️ No hay tareas pendientes en este momento.")
+            return None
+    except sqlite3.OperationalError as e:
+        print(f"⚠️ Error SQL en obtener_siguiente_tarea_pendiente: {str(e)}. ¿Existe la tabla 'generacion_tareas'?")
+        return None
+    except Exception as e:
+        print(f"❌ Error al obtener siguiente tarea pendiente: {str(e)}")
+        return None
+    finally:
+        conn.close()
+
+def actualizar_estado_tarea(tarea_id: int, estado: str, mensaje_error: str = None):
+    """Actualiza el estado de una tarea y opcionalmente un mensaje de error."""
+    conn = sqlite3.connect(DB_FILE_PATH)
+    cursor = conn.cursor()
+    try:
+        current_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        cursor.execute('''
+            UPDATE generacion_tareas
+            SET estado = ?, mensaje_error = ?, fecha_actualizacion = ?
+            WHERE id = ?
+        ''', (estado, mensaje_error, current_timestamp, tarea_id))
+        conn.commit()
+        if cursor.rowcount == 0:
+            print(f"⚠️ No se encontró la tarea con ID {tarea_id} para actualizar estado a '{estado}'.")
+        else:
+            print(f"✅ Estado de tarea ID {tarea_id} actualizado a '{estado}'.")
+    except sqlite3.OperationalError as e:
+        print(f"⚠️ Error SQL en actualizar_estado_tarea: {str(e)}.")
+        conn.rollback()
+    except Exception as e:
+        print(f"❌ Error al actualizar estado de tarea ID {tarea_id}: {str(e)}")
+        conn.rollback()
+    finally:
+        conn.close()
+
+def marcar_tarea_completada(tarea_id: int, articulo_generado_id: int):
+    """Marca una tarea como completada, asocia el ID del artículo y actualiza fechas."""
+    conn = sqlite3.connect(DB_FILE_PATH)
+    cursor = conn.cursor()
+    try:
+        current_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        cursor.execute('''
+            UPDATE generacion_tareas
+            SET estado = 'completado',
+                articulo_generado_id = ?,
+                mensaje_error = NULL,
+                fecha_actualizacion = ?,
+                fecha_finalizacion = ?
+            WHERE id = ?
+        ''', (articulo_generado_id, current_timestamp, current_timestamp, tarea_id))
+        conn.commit()
+        if cursor.rowcount == 0:
+             print(f"⚠️ No se encontró la tarea con ID {tarea_id} para marcar como completada.")
+        else:
+            print(f"✅ Tarea ID {tarea_id} marcada como completada. Artículo generado ID: {articulo_generado_id}.")
+    except sqlite3.OperationalError as e:
+        print(f"⚠️ Error SQL en marcar_tarea_completada: {str(e)}.")
+        conn.rollback()
+    except Exception as e:
+        print(f"❌ Error al marcar tarea ID {tarea_id} como completada: {str(e)}")
+        conn.rollback()
+    finally:
+        conn.close()
+
+def obtener_tareas_generacion(estado: str = None, limit: int = 50) -> list[dict]:
+    """Obtiene una lista de tareas de generación, opcionalmente filtradas por estado."""
+    conn = sqlite3.connect(DB_FILE_PATH)
+    cursor = conn.cursor()
+    try:
+        query = 'SELECT id, tema, estado, fecha_solicitud, fecha_actualizacion, fecha_finalizacion, articulo_generado_id FROM generacion_tareas'
+        params = []
+        if estado:
+            query += ' WHERE estado = ?'
+            params.append(estado)
+        query += ' ORDER BY fecha_solicitud DESC LIMIT ?'
+        params.append(limit)
+
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        col_names = [description[0] for description in cursor.description]
+        results = [dict(zip(col_names, row)) for row in rows]
+        print(f"📚 Encontradas {len(results)} tareas de generación (Filtro estado: {estado}).")
+        return results
+    except sqlite3.OperationalError as e:
+        print(f"⚠️ Error SQL en obtener_tareas_generacion: {str(e)}. ¿Existe la tabla 'generacion_tareas'?")
+        return []
+    except Exception as e:
+        print(f"❌ Error en obtener_tareas_generacion: {str(e)}")
+        return []
+    finally:
+        conn.close()
+
 
 # Bloque __main__ para probar solo database.py
 if __name__ == "__main__":
-    print("--- Probando database.py ---")
+    print("--- Probando database.py (incluyendo generacion_tareas) ---")
     try:
         # Limpieza para empezar fresco en la prueba
         if os.path.exists(DB_FILE_PATH):
@@ -651,6 +787,84 @@ if __name__ == "__main__":
              print("✅ 'DemoTestConfig' aparece en la lista de temas disponibles.")
         else:
              print("❌ 'DemoTestConfig' no aparece en la lista de temas disponibles.")
+
+        # --- Pruebas para generacion_tareas ---
+        print("\n--- Probando funciones de generacion_tareas ---")
+        # Crear tarea
+        tarea_id_1 = crear_tarea_generacion("TemaPruebaTareas1")
+        if tarea_id_1:
+            print(f"✅ Tarea 1 creada con ID: {tarea_id_1}")
+        else:
+            print(f"❌ Falló crear_tarea_generacion para TemaPruebaTareas1")
+
+        tarea_id_2 = crear_tarea_generacion("TemaPruebaTareas2", configuracion_id=1) # Asumiendo que config id 1 podría existir
+        if tarea_id_2:
+            print(f"✅ Tarea 2 creada con ID: {tarea_id_2}")
+        else:
+            print(f"❌ Falló crear_tarea_generacion para TemaPruebaTareas2")
+
+        # Obtener siguiente tarea pendiente
+        print("\nObteniendo siguiente tarea pendiente...")
+        tarea_pendiente = obtener_siguiente_tarea_pendiente()
+        if tarea_pendiente and tarea_pendiente['id'] == tarea_id_1 and tarea_pendiente['tema'] == "TemaPruebaTareas1":
+            print(f"✅ obtener_siguiente_tarea_pendiente() correcta: {tarea_pendiente}")
+        elif tarea_pendiente:
+            print(f"❌ obtener_siguiente_tarea_pendiente() incorrecta: {tarea_pendiente}")
+        else:
+            print("❌ No se encontró tarea pendiente como se esperaba.")
+
+        # Actualizar estado a 'en_progreso'
+        if tarea_pendiente:
+            print(f"\nActualizando tarea ID {tarea_pendiente['id']} a 'en_progreso'...")
+            actualizar_estado_tarea(tarea_pendiente['id'], "en_progreso")
+            # Verificar (obteniendo todas las tareas)
+            tareas = obtener_tareas_generacion()
+            tarea_actualizada = next((t for t in tareas if t['id'] == tarea_pendiente['id']), None)
+            if tarea_actualizada and tarea_actualizada['estado'] == 'en_progreso':
+                print("✅ Estado actualizado a 'en_progreso' correctamente.")
+            else:
+                print(f"❌ Falló la actualización a 'en_progreso'. Tarea actual: {tarea_actualizada}")
+
+        # Marcar tarea como completada (simulando un ID de artículo generado)
+        mock_articulo_generado_id = 999
+        if tarea_pendiente: # Usamos la misma tarea que estaba en progreso
+            print(f"\nMarcando tarea ID {tarea_pendiente['id']} como 'completado' con artículo ID {mock_articulo_generado_id}...")
+            marcar_tarea_completada(tarea_pendiente['id'], mock_articulo_generado_id)
+            tareas = obtener_tareas_generacion()
+            tarea_completada = next((t for t in tareas if t['id'] == tarea_pendiente['id']), None)
+            if tarea_completada and tarea_completada['estado'] == 'completado' and tarea_completada['articulo_generado_id'] == mock_articulo_generado_id:
+                print("✅ Tarea marcada como 'completado' correctamente.")
+            else:
+                print(f"❌ Falló el marcado como 'completado'. Tarea actual: {tarea_completada}")
+
+        # Obtener siguiente tarea pendiente (debería ser tarea_id_2)
+        print("\nObteniendo siguiente tarea pendiente (debería ser la Tarea 2)...")
+        tarea_pendiente_2 = obtener_siguiente_tarea_pendiente()
+        if tarea_pendiente_2 and tarea_pendiente_2['id'] == tarea_id_2:
+            print(f"✅ obtener_siguiente_tarea_pendiente() correcta para Tarea 2: {tarea_pendiente_2}")
+            # Actualizar a error
+            print(f"\nActualizando tarea ID {tarea_pendiente_2['id']} a 'error'...")
+            actualizar_estado_tarea(tarea_pendiente_2['id'], "error", "Simulación de error en worker.")
+            tareas = obtener_tareas_generacion(estado='error')
+            tarea_erronea = next((t for t in tareas if t['id'] == tarea_pendiente_2['id']), None)
+            if tarea_erronea and tarea_erronea['estado'] == 'error' and tarea_erronea['mensaje_error']:
+                print(f"✅ Estado actualizado a 'error' correctamente: {tarea_erronea['mensaje_error']}")
+            else:
+                print(f"❌ Falló la actualización a 'error'. Tarea actual: {tarea_erronea}")
+        elif tarea_pendiente_2:
+             print(f"❌ obtener_siguiente_tarea_pendiente() incorrecta, obtuvo: {tarea_pendiente_2}")
+        else:
+            print("❌ No se encontró la Tarea 2 pendiente como se esperaba.")
+
+        # Listar todas las tareas
+        print("\nListando todas las tareas de generación...")
+        todas_las_tareas = obtener_tareas_generacion(limit=10) # Limitar para no imprimir demasiado
+        for t in todas_las_tareas:
+            print(f"  - ID: {t['id']}, Tema: {t['tema']}, Estado: {t['estado']}, ArtículoID: {t.get('articulo_generado_id')}")
+        if len(todas_las_tareas) >= 2: # Deberíamos tener al menos las 2 que creamos
+            print("✅ obtener_tareas_generacion() parece funcionar.")
+        else:
+            print("❌ obtener_tareas_generacion() no retornó suficientes tareas.")
 
 
     except Exception as e:

@@ -200,6 +200,109 @@ async def generate_article_endpoint(request: Request):
     return {"message": "Generation pipeline completed successfully", "article_id": generated_article_id}
 
 
+# --- POST /dashboard/generar-articulo ---
+# Nuevo endpoint para que el dashboard solicite la generación de un artículo.
+# Crea una tarea en la base de datos que el worker procesará asíncronamente.
+@app.post("/dashboard/generar-articulo")
+async def dashboard_generate_article(request: Request):
+    """
+    Endpoint para que el dashboard solicite la generación de un artículo para un tema.
+    Crea una tarea en la tabla 'generacion_tareas'. El worker la procesará.
+    """
+    print("\n>>> API: Recibida solicitud POST /dashboard/generar-articulo <<<")
+    payload: Dict[str, Any] = await request.json()
+
+    tema = payload.get('tema')
+    configuracion_id = payload.get('configuracion_id') # Opcional
+
+    if not tema or not isinstance(tema, str):
+        print(">>> API: Error de validación: 'tema' es requerido y debe ser un string.")
+        raise HTTPException(status_code=400, detail="'tema' es requerido y debe ser un string.")
+
+    if configuracion_id is not None and not isinstance(configuracion_id, int):
+        print(">>> API: Error de validación: 'configuracion_id' debe ser un entero si se provee.")
+        raise HTTPException(status_code=400, detail="'configuracion_id' debe ser un entero si se provee.")
+
+    try:
+        # Verificar si ya existe una configuración para este tema.
+        # Esto es solo informativo, la creación de la tarea no depende de esto directamente
+        # ya que el worker usará la config del tema o defaults.
+        config_existente = database.get_config(tema)
+        if not config_existente:
+            print(f"   ⚠️  API: No existe configuración guardada para el tema '{tema}'. El worker usará defaults.")
+        else:
+            print(f"   ℹ️  API: Existe configuración para el tema '{tema}'.")
+
+        # Crear la tarea de generación en la base de datos
+        tarea_id = database.crear_tarea_generacion(tema=tema, configuracion_id=configuracion_id)
+
+        print(f"   ✅ API: Tarea de generación creada con ID {tarea_id} para el tema '{tema}'.")
+        return {"message": "Solicitud de generación de artículo recibida.", "tarea_id": tarea_id}
+
+    except Exception as e:
+        print(f"❌ API: Error al crear tarea de generación para tema '{tema}': {str(e)}")
+        # Podríamos querer loguear el traceback aquí también en un sistema real
+        raise HTTPException(status_code=500, detail=f"Error interno al procesar la solicitud de generación: {str(e)}")
+
+
+# --- GET /dashboard/tareas-generacion ---
+# Nuevo endpoint para listar las tareas de generación y su estado.
+@app.get("/dashboard/tareas-generacion")
+async def dashboard_list_generation_tasks(estado: Optional[str] = None, limit: int = 50):
+    """
+    Endpoint para listar las tareas de generación, opcionalmente filtradas por estado.
+    """
+    print(f"\n>>> API: Recibida solicitud GET /dashboard/tareas-generacion (Estado: {estado}, Limite: {limit}) <<<")
+    try:
+        # Validar el parámetro de estado si se proporciona
+        valid_estados = ["pendiente", "en_progreso", "completado", "error", None]
+        if estado not in valid_estados:
+            # Permitimos None para no filtrar, pero si se da un estado, debe ser válido.
+            # Aunque la función de DB podría manejar estados inválidos simplemente no devolviendo nada,
+            # es buena práctica validar en la API.
+            # Sin embargo, la función obtener_tareas_generacion no valida el string de estado,
+            # simplemente lo pasa a la query SQL, así que esta validación aquí es opcional
+            # o podría ser más robusta. Por ahora, la dejamos simple.
+            pass
+
+        tareas = database.obtener_tareas_generacion(estado=estado, limit=limit)
+        print(f"   ✅ API: Retornando {len(tareas)} tareas de generación.")
+        return tareas
+    except Exception as e:
+        print(f"❌ API: Error al obtener lista de tareas de generación: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error interno al obtener las tareas de generación: {str(e)}")
+
+
+# --- GET /dashboard/tareas-generacion/{tarea_id} ---
+# Nuevo endpoint para obtener el estado de una tarea específica. (Opcional según plan, pero útil)
+@app.get("/dashboard/tareas-generacion/{tarea_id}")
+async def dashboard_get_generation_task(tarea_id: int):
+    """
+    Endpoint para obtener el estado y detalles de una tarea de generación específica.
+    """
+    print(f"\n>>> API: Recibida solicitud GET /dashboard/tareas-generacion/{tarea_id} <<<")
+    try:
+        # Necesitaríamos una función en database.py para obtener una tarea por ID.
+        # Por ahora, podemos simularlo buscando en la lista de todas las tareas,
+        # o añadir la función a database.py.
+        # Asumamos que añadimos `database.get_tarea_by_id(tarea_id)`
+        # tarea = database.get_tarea_by_id(tarea_id) # Esta función no existe aún
+
+        # Alternativa temporal: buscar en todas las tareas (ineficiente para muchas tareas)
+        todas_las_tareas = database.obtener_tareas_generacion(limit=1000) # Un límite alto para buscar
+        tarea = next((t for t in todas_las_tareas if t['id'] == tarea_id), None)
+
+        if tarea:
+            print(f"   ✅ API: Retornando detalles para tarea ID {tarea_id}.")
+            return tarea
+        else:
+            print(f"   ❌ API: Tarea de generación con ID {tarea_id} no encontrada.")
+            raise HTTPException(status_code=404, detail=f"Tarea de generación con ID {tarea_id} no encontrada.")
+    except Exception as e:
+        print(f"❌ API: Error al obtener tarea de generación ID {tarea_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error interno al obtener la tarea de generación: {str(e)}")
+
+
 # --- GET /config/{tema} ---
 @app.get("/config/{tema}")
 async def get_config_endpoint(tema: str):
@@ -346,15 +449,18 @@ async def chat_with_copilot_endpoint(request: Request):
 
 # --- GET /admin/sources ---
 @app.get("/admin/sources")
-async def list_sources_endpoint():
+async def list_sources_endpoint(limit: int = 100): # Añadido parámetro limit con default
     """
     Endpoint para obtener todos los artículos fuente scrapeados.
     """
-    print("\n>>> API: Recibida solicitud GET /admin/sources <<<")
-    # database.get_all_sources() asumiendo que acepta 0 args
-    sources = database.et_all_sources()
-    print(f"✅ API: Retornando {len(sources)} fuentes.")
-    return sources
+    print(f"\n>>> API: Recibida solicitud GET /admin/sources (Limite: {limit}) <<<")
+    try:
+        sources = database.get_all_sources(limit=limit) # Pasar limit a la función de DB
+        print(f"   ✅ API: Retornando {len(sources)} fuentes.")
+        return sources
+    except Exception as e:
+        print(f"❌ API: Error al obtener fuentes: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error interno al obtener las fuentes: {str(e)}")
 
 
 # --- GET /temas-secciones ---

@@ -242,190 +242,470 @@
 
     <div class="container">
 
-        <!-- Sección 1: Generar Artículo -->
-        <section id="generate-section" class="section">
-            <h2>Generar Nuevo Artículo</h2>
-            <form id="generate-form">
+        <!-- Sección 1: Solicitar Generación de Artículo -->
+        <section id="request-generation-section" class="section">
+            <h2>Solicitar Nueva Generación de Artículo</h2>
+            <form id="request-generate-form">
                 <div class="form-group full-width">
-                    <label for="topic">Tema:</label>
-                    <input type="text" id="topic" placeholder="Ej: Avances de la IA en medicina 2025" class="full-width">
+                    <label for="request-topic">Tema:</label>
+                    <input type="text" id="request-topic" placeholder="Ej: Futuro de la exploración espacial" class="full-width">
                 </div>
-                <div class="form-group">
-                    <label for="length">Longitud:</label>
-                    <select id="length">
-                        <option value="short">Corta</option>
-                        <option value="medium" selected>Media</option>
-                        <option value="long">Larga</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="tone">Tono:</label>
-                    <select id="tone">
-                        <option value="neutral" selected>Neutral</option>
-                        <option value="formal">Formal</option>
-                        <option value="informal">Informal</option>
-                        <option value="technical">Técnico</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="num-sources"># Fuentes a Usar:</label>
-                    <input type="number" id="num-sources" value="3" min="1" max="10">
-                </div>
-                 <div class="form-group">
-                    <label for="min-score">Score Mínimo Fuente:</label>
-                    <input type="number" id="min-score" value="7" min="1" max="10">
-                </div>
-                <button type="submit">Iniciar Generación Automática</button>
+                <!-- Opcional: Podríamos añadir un campo para configuracion_id si quisiéramos permitirlo desde aquí -->
+                <button type="submit">Solicitar Generación</button>
             </form>
+            <div id="request-response" style="margin-top: 15px;"></div>
         </section>
 
-        <!-- Sección 2: Artículos Generados -->
+        <!-- Sección 2: Tareas de Generación -->
+        <section id="tasks-section" class="section">
+            <h2>Tareas de Generación</h2>
+            <div style="margin-bottom: 15px;">
+                <label for="task-status-filter">Filtrar por estado:</label>
+                <select id="task-status-filter">
+                    <option value="">Todos</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en_progreso">En Progreso</option>
+                    <option value="completado">Completado</option>
+                    <option value="error">Error</option>
+                </select>
+                <button onclick="fetchGenerationTasks()">Cargar Tareas</button>
+            </div>
+            <p id="loading-tasks" style="display: none;">Cargando tareas...</p>
+            <table id="generation-tasks-table" style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>ID Tarea</th>
+                        <th>Tema</th>
+                        <th>Estado</th>
+                        <th>Fecha Solicitud</th>
+                        <th>Fecha Actualización</th>
+                        <th>ID Artículo Generado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Las filas de tareas se insertarán aquí -->
+                </tbody>
+            </table>
+            <p id="no-tasks" style="display: none;">No hay tareas para mostrar.</p>
+        </section>
+
+        <!-- Sección 3: Artículos Generados (Listado General) -->
         <section id="articles-list" class="section">
-            <h2>Artículos Generados (Pendientes de Revisión)</h2>
+            <h2>Artículos Generados</h2>
+            <button onclick="fetchAllArticles()">Cargar Todos los Artículos</button>
             <p id="loading-articles" style="display: none;">Cargando artículos...</p>
             <ul id="generated-articles-list">
-                <!-- Ejemplo de artículo generado (esto se llenaría dinámicamente por Bolt) -->
-                <li>
-                    <div class="article-info">
-                        <h3>Ejemplo: Impacto de la IA en la Medicina Futura</h3>
-                        <p>Tema: IA en medicina | Generado: 2024-06-15 10:30 | Estado: Generado</p>
-                    </div>
-                    <div class="article-actions">
-                        <a href="#review-section" onclick="showReviewSection('ejemplo-id-1'); return false;">Revisar</a>
-                         <a href="#" onclick="alert('Simulando Publicar...'); return false;">Publicar</a>
-                         <a href="#" onclick="alert('Simulando Descargar HTML...'); return false;">Descargar HTML</a>
-                    </div>
-                </li>
-                 <li>
-                    <div class="article-info">
-                        <h3>Ejemplo: Tendencias en Robótica Educativa para 2025</h3>
-                        <p>Tema: Robótica educativa | Generado: 2024-06-15 09:15 | Estado: Generado</p>
-                    </div>
-                    <div class="article-actions">
-                        <a href="#review-section" onclick="showReviewSection('ejemplo-id-2'); return false;">Revisar</a>
-                         <a href="#" onclick="alert('Simulando Publicar...'); return false;">Publicar</a>
-                         <a href="#" onclick="alert('Simulando Descargar HTML...'); return false;">Descargar HTML</a>
-                    </div>
-                </li>
-                <!-- Más artículos aquí -->
+                <!-- Los artículos se listarán aquí -->
             </ul>
-            <p id="no-articles" style="display: none;">No hay artículos generados pendientes de revisión.</p>
+            <p id="no-articles-message" style="display: none;">No hay artículos generados.</p>
         </section>
 
-         <!-- Sección 3: Revisar/Editar Artículo (Simulada) -->
-        <section id="review-section" class="section">
+        <!-- Sección 4: Configuración por Tema -->
+        <section id="config-section" class="section">
+            <h2>Configuración por Tema</h2>
+            <div>
+                <label for="config-tema-load">Cargar configuración para el Tema:</label>
+                <input type="text" id="config-tema-load" placeholder="Nombre del tema">
+                <button onclick="loadConfigForTopic()">Cargar Config</button>
+            </div>
+            <div id="config-fields" style="margin-top:15px;">
+                <form id="config-form">
+                    <input type="hidden" id="config-id"> <!-- Para mantener el ID si se está editando -->
+                    <div class="form-group"><label for="config-tema">Tema:</label><input type="text" id="config-tema" required></div>
+                    <div class="form-group"><label for="min_score_fuente">Min Score Fuente (Scraper):</label><input type="number" id="min_score_fuente" value="5"></div>
+                    <div class="form-group"><label for="num_fuentes_scraper"># Fuentes (Scraper):</label><input type="number" id="num_fuentes_scraper" value="10"></div>
+                    <div class="form-group"><label for="min_score_generador">Min Score Fuente (Generador):</label><input type="number" id="min_score_generador" value="7"></div>
+                    <div class="form-group"><label for="num_fuentes_generador"># Fuentes (Generador):</label><input type="number" id="num_fuentes_generador" value="3"></div>
+                    <div class="form-group"><label for="num_imagenes_buscar"># Imágenes a Buscar:</label><input type="number" id="num_imagenes_buscar" value="2"></div>
+
+                    <div class="form-group full-width"><label for="prompt_analyzer_template">Prompt Analyzer Template (Opcional):</label><textarea id="prompt_analyzer_template" rows="3"></textarea></div>
+                    <div class="form-group full-width"><label for="prompt_generator_template">Prompt Generator Template (Opcional):</label><textarea id="prompt_generator_template" rows="5"></textarea></div>
+                    <!-- Añadir más campos de config si es necesario: longitud_texto, tono_texto, prompt_copilot_template -->
+                    <button type="submit">Guardar Configuración</button>
+                </form>
+            </div>
+            <div id="config-response" style="margin-top: 15px;"></div>
+            <hr>
+            <h3>Temas con Configuración Existente</h3>
+            <button onclick="loadAvailableTopics()">Listar Temas con Config</button>
+            <ul id="available-topics-list"></ul>
+        </section>
+
+        <!-- Sección de Revisión/Edición (Oculta por defecto) -->
+        <section id="review-section" class="section" style="display: none;">
              <button onclick="hideReviewSection();" style="float: right; background-color: #ccc; color: #333; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">Cerrar</button>
-             <h2 class="article-title-review">Revisar Artículo: [Título del Artículo]</h2>
-             <p id="article-review-meta" style="text-align: center; color: #555; margin-bottom: 20px;">Tema: [Tema] | Generado: [Fecha]</p>
+             <h2 id="review-article-title">Revisar Artículo:</h2>
+             <p id="review-article-meta" style="text-align: center; color: #555; margin-bottom: 20px;"></p>
+             <input type="hidden" id="review-article-id">
 
              <div class="image-preview-area">
                  <h3>Imagen Principal</h3>
-                 <img id="article-review-image" src="https://via.placeholder.com/300x200?text=Imagen+de+Ejemplo" alt="Imagen de ejemplo">
-                 <p style="font-size: 0.9em; color: #666; margin-top: 5px;">Foto por [Autor] en [Fuente]</p>
-                 <!-- Opcional: Galería de candidatos / Buscar Otra -->
+                 <img id="review-article-image" src="https://via.placeholder.com/300x200?text=Imagen" alt="Imagen del artículo">
+                 <div id="review-article-images-gallery"></div>
              </div>
 
              <div class="editor-area">
-                 <h3>Contenido del Artículo (Editar)</h3>
-                 <!-- Aquí iría el editor, simulado con un textarea -->
-                 <textarea id="article-body-editor">
-## Introducción
-
-Este es un ejemplo de texto generado por la IA. Puedes editarlo directamente aquí.
-
-### Subtítulo de Ejemplo
-
-Aquí hay más contenido.
-
-* Punto 1
-* Punto 2
-
-## Conclusión
-
-¡Fin del artículo de ejemplo!
-                 </textarea>
-                 <button onclick="alert('Simulando Guardar Cambios...');">Guardar Cambios</button>
+                 <h3>Contenido del Artículo (Markdown)</h3>
+                 <textarea id="review-body-editor" rows="15"></textarea>
+                 <h3>Título:</h3>
+                 <input type="text" id="review-title-editor" style="width:100%; padding:8px; margin-bottom:10px;">
+                 <h3>Meta Descripción:</h3>
+                 <textarea id="review-meta_description-editor" rows="3" style="width:100%; padding:8px; margin-bottom:10px;"></textarea>
+                 <h3>Tags (separadas por coma):</h3>
+                 <input type="text" id="review-tags-editor" style="width:100%; padding:8px; margin-bottom:10px;">
+                 <h3>Estado:</h3>
+                 <select id="review-estado-editor">
+                    <option value="generado">Generado</option>
+                    <option value="pendiente_revision">Pendiente Revisión</option>
+                    <option value="publicado">Publicado</option>
+                    <option value="descartado">Descartado</option>
+                 </select>
+                 <button onclick="saveArticleChanges()">Guardar Cambios del Artículo</button>
              </div>
-
-            <div class="chat-area">
-                <h3>Chat con Asistente IA</h3>
-                <div class="chat-log" id="ia-chat-log">
-                    <div class="ai-message">Asistente: ¡Hola! Estoy listo para ayudarte a revisar este artículo. ¿Tienes alguna pregunta o instrucción?</div>
-                    <!-- Mensajes de chat se añadirían aquí -->
-                </div>
-                <div class="chat-input">
-                    <textarea id="ia-chat-input" placeholder="Escribe tu mensaje a la IA..."></textarea>
-                    <button onclick="alert('Simulando Enviar Mensaje...');">Enviar a IA</button>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- Sección 4: Explorar Base de Datos -->
-        <section id="explore-db-section" class="section">
-            <h2>Explorar Base de Datos</h2>
-            <ul>
-                <li><a href="#" onclick="alert('Simulando ver Fuentes Scrapeadas...'); return false;">Ver Fuentes Scrapeadas</a></li>
-                <li><a href="#" onclick="alert('Simulando ver Artículos Generados (Todos los Estados)...'); return false;">Ver Artículos Generados (Todos los Estados)</a></li>
-                <!-- Opcional: Ver imágenes, tags, etc. -->
-            </ul>
+             <div id="review-save-response" style="margin-top:10px;"></div>
         </section>
 
     </div>
 
     <script>
-        // Funcionalidad básica para mostrar/ocultar la sección de revisión
-        function showReviewSection(articleId) {
+        const API_BASE_URL = 'http://127.0.0.1:8000'; // Asegúrate que coincida con tu API
+
+        // --- Sección 1: Solicitar Generación de Artículo ---
+        document.getElementById('request-generate-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const topic = document.getElementById('request-topic').value;
+            const responseDiv = document.getElementById('request-response');
+            responseDiv.textContent = '';
+
+            if (!topic) {
+                responseDiv.textContent = "Por favor, ingresa un tema.";
+                responseDiv.style.color = 'red';
+                return;
+            }
+
+            try {
+                responseDiv.textContent = "Solicitando generación...";
+                responseDiv.style.color = 'blue';
+                const response = await fetch(`${API_BASE_URL}/dashboard/generar-articulo`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tema: topic })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    responseDiv.textContent = `Solicitud enviada. Tarea ID: ${data.tarea_id}`;
+                    responseDiv.style.color = 'green';
+                    document.getElementById('request-topic').value = ''; // Limpiar campo
+                    fetchGenerationTasks(); // Actualizar lista de tareas
+                } else {
+                    responseDiv.textContent = `Error: ${data.detail || response.statusText}`;
+                    responseDiv.style.color = 'red';
+                }
+            } catch (error) {
+                responseDiv.textContent = `Error de red: ${error.message}`;
+                responseDiv.style.color = 'red';
+            }
+        });
+
+        // --- Sección 2: Tareas de Generación ---
+        async function fetchGenerationTasks() {
+            const statusFilter = document.getElementById('task-status-filter').value;
+            const loadingP = document.getElementById('loading-tasks');
+            const noTasksP = document.getElementById('no-tasks');
+            const tbody = document.querySelector('#generation-tasks-table tbody');
+
+            loadingP.style.display = 'block';
+            noTasksP.style.display = 'none';
+            tbody.innerHTML = ''; // Limpiar tabla
+
+            try {
+                let url = `${API_BASE_URL}/dashboard/tareas-generacion?limit=50`;
+                if (statusFilter) {
+                    url += `&estado=${statusFilter}`;
+                }
+                const response = await fetch(url);
+                const tasks = await response.json();
+
+                if (tasks.length === 0) {
+                    noTasksP.style.display = 'block';
+                } else {
+                    tasks.forEach(task => {
+                        const row = tbody.insertRow();
+                        row.insertCell().textContent = task.id;
+                        row.insertCell().textContent = task.tema;
+                        row.insertCell().textContent = task.estado;
+                        row.insertCell().textContent = new Date(task.fecha_solicitud).toLocaleString();
+                        row.insertCell().textContent = task.fecha_actualizacion ? new Date(task.fecha_actualizacion).toLocaleString() : '-';
+                        row.insertCell().textContent = task.articulo_generado_id || '-';
+
+                        const actionsCell = row.insertCell();
+                        if (task.estado === 'completado' && task.articulo_generado_id) {
+                            const reviewButton = document.createElement('button');
+                            reviewButton.textContent = 'Revisar Artículo';
+                            reviewButton.onclick = () => loadArticleForReview(task.articulo_generado_id);
+                            actionsCell.appendChild(reviewButton);
+                        } else if (task.estado === 'error' && task.mensaje_error) {
+                            const errorButton = document.createElement('button');
+                            errorButton.textContent = 'Ver Error';
+                            errorButton.onclick = () => alert(`Error Tarea ${task.id}:\n${task.mensaje_error}`);
+                            actionsCell.appendChild(errorButton);
+                        }
+                    });
+                }
+            } catch (error) {
+                noTasksP.textContent = `Error al cargar tareas: ${error.message}`;
+                noTasksP.style.display = 'block';
+            } finally {
+                loadingP.style.display = 'none';
+            }
+        }
+        // Cargar tareas al inicio
+        fetchGenerationTasks();
+
+
+        // --- Sección 3: Artículos Generados (Listado General) ---
+        async function fetchAllArticles() {
+            const listUl = document.getElementById('generated-articles-list');
+            const loadingP = document.getElementById('loading-articles');
+            const noArticlesP = document.getElementById('no-articles-message');
+            loadingP.style.display = 'block';
+            noArticlesP.style.display = 'none';
+            listUl.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/articles`);
+                const articles = await response.json();
+                if (articles.length === 0) {
+                    noArticlesP.style.display = 'block';
+                } else {
+                    articles.forEach(article => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <div class="article-info">
+                                <h3>${article.titulo} (ID: ${article.id})</h3>
+                                <p>Tema: ${article.tema} | Generado: ${new Date(article.fecha_generacion).toLocaleDateString()} | Estado: ${article.estado}</p>
+                            </div>
+                            <div class="article-actions">
+                                <button onclick="loadArticleForReview(${article.id})">Revisar/Editar</button>
+                            </div>`;
+                        listUl.appendChild(li);
+                    });
+                }
+            } catch (error) {
+                noArticlesP.textContent = `Error al cargar artículos: ${error.message}`;
+                noArticlesP.style.display = 'block';
+            } finally {
+                loadingP.style.display = 'none';
+            }
+        }
+
+
+        // --- Sección 4: Configuración por Tema ---
+        async function loadConfigForTopic() {
+            const tema = document.getElementById('config-tema-load').value;
+            const responseDiv = document.getElementById('config-response');
+            responseDiv.textContent = '';
+            if (!tema) {
+                responseDiv.textContent = 'Por favor, ingresa un tema para cargar su configuración.';
+                responseDiv.style.color = 'orange';
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE_URL}/config/${tema}`);
+                const config = await response.json();
+                if (response.ok) {
+                    document.getElementById('config-tema').value = config.tema || tema; // Usar el tema de la config o el buscado
+                    document.getElementById('min_score_fuente').value = config.min_score_fuente || 5;
+                    document.getElementById('num_fuentes_scraper').value = config.num_fuentes_scraper || 10;
+                    document.getElementById('min_score_generador').value = config.min_score_generador || 7;
+                    document.getElementById('num_fuentes_generador').value = config.num_fuentes_generador || 3;
+                    document.getElementById('num_imagenes_buscar').value = config.num_imagenes_buscar || 2;
+                    document.getElementById('prompt_analyzer_template').value = config.prompt_analyzer_template || '';
+                    document.getElementById('prompt_generator_template').value = config.prompt_generator_template || '';
+                    // document.getElementById('config-id').value = config.id || ''; // Si tuvieras un ID de config
+                    responseDiv.textContent = `Configuración para '${tema}' cargada.`;
+                    responseDiv.style.color = 'green';
+                } else {
+                    responseDiv.textContent = `No se encontró configuración para '${tema}' o hubo un error: ${config.detail || response.statusText}. Se muestran valores por defecto.`;
+                    responseDiv.style.color = 'orange';
+                    // Cargar defaults en el form si no se encontró
+                    document.getElementById('config-tema').value = tema;
+                    document.getElementById('min_score_fuente').value = 5;
+                    // ... y así para los demás campos ...
+                }
+            } catch (error) {
+                responseDiv.textContent = `Error de red al cargar config: ${error.message}`;
+                responseDiv.style.color = 'red';
+            }
+        }
+
+        document.getElementById('config-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const responseDiv = document.getElementById('config-response');
+            const configData = {
+                tema: document.getElementById('config-tema').value,
+                min_score_fuente: parseInt(document.getElementById('min_score_fuente').value) || 0,
+                num_fuentes_scraper: parseInt(document.getElementById('num_fuentes_scraper').value) || 0,
+                min_score_generador: parseInt(document.getElementById('min_score_generador').value) || 0,
+                num_fuentes_generador: parseInt(document.getElementById('num_fuentes_generador').value) || 0,
+                num_imagenes_buscar: parseInt(document.getElementById('num_imagenes_buscar').value) || 0,
+                prompt_analyzer_template: document.getElementById('prompt_analyzer_template').value || null,
+                prompt_generator_template: document.getElementById('prompt_generator_template').value || null,
+            };
+
+            if (!configData.tema) {
+                responseDiv.textContent = "El campo 'Tema' es obligatorio para guardar la configuración.";
+                responseDiv.style.color = 'red';
+                return;
+            }
+
+            try {
+                responseDiv.textContent = "Guardando configuración...";
+                responseDiv.style.color = 'blue';
+                const response = await fetch(`${API_BASE_URL}/config`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(configData)
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    responseDiv.textContent = `Configuración para '${configData.tema}' guardada exitosamente.`;
+                    responseDiv.style.color = 'green';
+                    loadAvailableTopics(); // Actualizar lista de temas con config
+                } else {
+                    responseDiv.textContent = `Error al guardar: ${data.detail || response.statusText}`;
+                    responseDiv.style.color = 'red';
+                }
+            } catch (error) {
+                responseDiv.textContent = `Error de red al guardar config: ${error.message}`;
+                responseDiv.style.color = 'red';
+            }
+        });
+
+        async function loadAvailableTopics() {
+            const listUl = document.getElementById('available-topics-list');
+            listUl.innerHTML = 'Cargando...';
+            try {
+                const response = await fetch(`${API_BASE_URL}/temas-secciones`);
+                const topics = await response.json();
+                listUl.innerHTML = '';
+                if (topics.length === 0) {
+                    listUl.innerHTML = '<li>No hay temas con configuración guardada.</li>';
+                } else {
+                    topics.forEach(topic => {
+                        const li = document.createElement('li');
+                        li.textContent = topic;
+                        listUl.appendChild(li);
+                    });
+                }
+            } catch (error) {
+                listUl.innerHTML = `<li>Error al cargar temas: ${error.message}</li>`;
+            }
+        }
+        loadAvailableTopics(); // Cargar al inicio
+
+
+        // --- Sección de Revisión/Edición ---
+        async function loadArticleForReview(articleId) {
             document.getElementById('articles-list').style.display = 'none';
+            document.getElementById('tasks-section').style.display = 'none'; // Ocultar tareas también
             document.getElementById('review-section').style.display = 'block';
-            // En la implementación real en Bolt, aquí cargarías los datos
-            // del artículo con el ID (articleId) usando el endpoint GET /articles/{articleId}
-            // y llenarías el título, texto del editor, imagen, etc.
-            document.querySelector('#review-section .article-title-review').innerText = 'Revisar Artículo: ' + (articleId === 'ejemplo-id-1' ? 'Impacto de la IA en la Medicina Futura' : 'Tendencias en Robótica Educativa para 2025');
-            document.getElementById('article-body-editor').value = 'Texto cargado para ' + articleId + '\n\nAquí iría el contenido real del artículo.';
-            // La imagen y metadata también se cargarían aquí
+
+            const responseDiv = document.getElementById('review-save-response');
+            responseDiv.textContent = 'Cargando artículo...';
+            responseDiv.style.color = 'blue';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/articles/${articleId}`);
+                const article = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('review-article-id').value = article.id;
+                    document.getElementById('review-article-title').textContent = `Revisar Artículo: ${article.titulo}`;
+                    document.getElementById('review-article-meta').textContent = `Tema: ${article.tema} | ID: ${article.id} | Generado: ${new Date(article.fecha_generacion).toLocaleString()}`;
+
+                    document.getElementById('review-title-editor').value = article.titulo || '';
+                    document.getElementById('review-meta_description-editor').value = article.meta_description || '';
+                    document.getElementById('review-tags-editor').value = Array.isArray(article.tags) ? article.tags.join(', ') : (article.tags || '');
+                    document.getElementById('review-body-editor').value = article.body || '';
+                    document.getElementById('review-estado-editor').value = article.estado || 'generado';
+
+                    const imagesGallery = document.getElementById('review-article-images-gallery');
+                    imagesGallery.innerHTML = ''; // Limpiar galería
+                    if (article.imagenes && article.imagenes.length > 0) {
+                        document.getElementById('review-article-image').src = article.imagenes[0].url;
+                        document.getElementById('review-article-image').alt = article.imagenes[0].alt_text || article.titulo;
+                        // Si hay más imágenes, mostrarlas en la galería
+                        article.imagenes.forEach(img => {
+                            const imgElem = document.createElement('img');
+                            imgElem.src = img.url;
+                            imgElem.alt = img.alt_text || 'Imagen relacionada';
+                            imgElem.style.maxWidth = '100px'; imgElem.style.maxHeight = '100px'; imgElem.style.margin = '5px';
+                            imagesGallery.appendChild(imgElem);
+                        });
+                    } else {
+                        document.getElementById('review-article-image').src = 'https://via.placeholder.com/300x200?text=No+Imagen';
+                        document.getElementById('review-article-image').alt = 'No hay imagen disponible';
+                    }
+                    responseDiv.textContent = 'Artículo cargado.';
+                    responseDiv.style.color = 'green';
+                } else {
+                    responseDiv.textContent = `Error al cargar artículo ${articleId}: ${article.detail || response.statusText}`;
+                    responseDiv.style.color = 'red';
+                }
+            } catch (error) {
+                responseDiv.textContent = `Error de red al cargar artículo: ${error.message}`;
+                responseDiv.style.color = 'red';
+            }
         }
 
         function hideReviewSection() {
             document.getElementById('review-section').style.display = 'none';
-            document.getElementById('articles-list').style.display = 'block';
+            document.getElementById('articles-list').style.display = 'block'; // O la sección que corresponda
+            document.getElementById('tasks-section').style.display = 'block';
         }
 
-        // Simulación de envío del formulario de generación
-        document.getElementById('generate-form').addEventListener('submit', function(event) {
-            event.preventDefault(); // Evitar que el formulario se envíe realmente
-            const topic = document.getElementById('topic').value;
-            const length = document.getElementById('length').value;
-            const tone = document.getElementById('tone').value;
-            const numSources = document.getElementById('num-sources').value;
-            const minScore = document.getElementById('min-score').value;
-
-            if (!topic) {
-                alert("Por favor, ingresa un tema.");
+        async function saveArticleChanges() {
+            const articleId = document.getElementById('review-article-id').value;
+            const responseDiv = document.getElementById('review-save-response');
+            if (!articleId) {
+                responseDiv.textContent = "No hay ID de artículo para guardar.";
+                responseDiv.style.color = 'red';
                 return;
             }
 
-            // Aquí es donde Bolt llamaría a tu endpoint POST /generate
-            alert(`Simulando iniciar generación:\nTema: ${topic}\nLongitud: ${length}\nTono: ${tone}\nFuentes: ${numSources} (min score ${minScore})`);
+            const updatedData = {
+                titulo: document.getElementById('review-title-editor').value,
+                meta_description: document.getElementById('review-meta_description-editor').value,
+                tags: document.getElementById('review-tags-editor').value.split(',').map(tag => tag.trim()).filter(tag => tag), // Convertir a lista
+                body: document.getElementById('review-body-editor').value,
+                estado: document.getElementById('review-estado-editor').value
+            };
 
-            // Después de una simulación exitosa, podrías simular añadir un artículo a la lista
-            // Esto sería manejo de estado en Bolt en la implementación real
-            // console.log("Simulando añadir artículo a la lista...");
-            // const articlesList = document.getElementById('generated-articles-list');
-            // const newItem = document.createElement('li');
-            // newItem.innerHTML = `
-            //     <div class="article-info">
-            //         <h3>Nuevo Artículo: ${topic}</h3>
-            //         <p>Tema: ${topic} | Generado: ${new Date().toLocaleString()} | Estado: Generando...</p>
-            //     </div>
-            //     <div class="article-actions">
-            //         <a href="#" onclick="showReviewSection('simulated-id'); return false;">Revisar</a>
-            //          <a href="#" onclick="alert('Simulando Publicar...'); return false;">Publicar</a>
-            //          <a href="#" onclick="alert('Simulando Descargar HTML...'); return false;">Descargar HTML</a>
-            //     </div>
-            // `;
-            // articlesList.appendChild(newItem);
-        });
+            try {
+                responseDiv.textContent = "Guardando cambios...";
+                responseDiv.style.color = 'blue';
+                const response = await fetch(`${API_BASE_URL}/articles/${articleId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    responseDiv.textContent = `Artículo ID ${articleId} actualizado exitosamente.`;
+                    responseDiv.style.color = 'green';
+                    fetchGenerationTasks(); // Actualizar lista de tareas por si el estado cambió
+                    fetchAllArticles(); // Actualizar lista de artículos
+                } else {
+                    responseDiv.textContent = `Error al guardar: ${data.detail || response.statusText}`;
+                    responseDiv.style.color = 'red';
+                }
+            } catch (error) {
+                responseDiv.textContent = `Error de red al guardar: ${error.message}`;
+                responseDiv.style.color = 'red';
+            }
+        }
 
     </script>
 </body>

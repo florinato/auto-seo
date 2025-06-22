@@ -75,3 +75,18 @@ CREATE TABLE IF NOT EXISTS configuracion (
     fecha_creacion TEXT DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TEXT DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Nueva Tabla para gestionar las tareas de generación de contenido
+CREATE TABLE IF NOT EXISTS generacion_tareas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tema TEXT NOT NULL,
+    estado TEXT NOT NULL DEFAULT 'pendiente', -- 'pendiente', 'en_progreso', 'completado', 'error'
+    configuracion_id INTEGER, -- Opcional, para asociar una config específica si no se usa la del tema
+    articulo_generado_id INTEGER, -- Para enlazar con el artículo una vez generado
+    mensaje_error TEXT, -- Para guardar detalles si la tarea falla
+    fecha_solicitud TEXT DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TEXT DEFAULT CURRENT_TIMESTAMP, -- Para rastrear cuándo se actualizó el estado
+    fecha_finalizacion TEXT,
+    FOREIGN KEY (configuracion_id) REFERENCES configuracion(id),
+    FOREIGN KEY (articulo_generado_id) REFERENCES articulos_generados(id)
+);

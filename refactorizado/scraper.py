@@ -15,11 +15,17 @@ from bs4 import BeautifulSoup
 import database
 
 
-def buscar_noticias(tema, num_noticias=5):
+def buscar_noticias(query: str, num_noticias: int = 5, min_score_fuente: int = 5, prompt_analyzer_template: str = None):
     """
-    Busca noticias sobre un tema, resuelve URLs, analiza con IA y retorna resultados.
+    Busca noticias sobre un tema (query), resuelve URLs, analiza con IA y retorna resultados.
+
+    Args:
+        query (str): El tema o consulta de búsqueda.
+        num_noticias (int): Número máximo de artículos a retornar después del filtrado.
+        min_score_fuente (int): Score mínimo que debe tener una fuente analizada para ser considerada.
+        prompt_analyzer_template (str, optional): Plantilla de prompt para el analizador. Defaults to None.
     """
-    print(f"\n🔍 Buscando noticias sobre: {tema}")
+    print(f"\n🔍 Buscando noticias sobre: {query} (Num noticias: {num_noticias}, Score min: {min_score_fuente})")
 
     # La función interna de búsqueda no necesita cambios.
     def fetch_urls_from_ddg():
@@ -86,10 +92,16 @@ def buscar_noticias(tema, num_noticias=5):
                     continue
 
                 # Analizar con IA
-                analysis = analyzer.analyze_with_gemini(tema, text)
-                analysis['url'] = final_url
-                ranked_articles.append(analysis)
-                print(f"✅ Analizado: {final_url[:60]}... | Score: {analysis.get('score', 0)}")
+                # TODO: Modificar analyzer.analyze_with_gemini para que acepte prompt_template si se proporciona
+                analysis_result = analyzer.analyze_with_gemini(query, text) # Pasando 'query' como el tema para el análisis
+
+                if not analysis_result: # Si el análisis falla o retorna None
+                    print(f"⏩ Saltando URL por fallo en análisis IA: {final_url[:60]}...")
+                    continue
+
+                analysis_result['url'] = final_url # Asegurar que la URL está en el resultado
+                ranked_articles.append(analysis_result)
+                print(f"✅ Analizado: {final_url[:60]}... | Score: {analysis_result.get('score', 0)}")
 
             except Exception as e:
                 # Capturar error de UNA SOLA URL, para que el bucle continúe
@@ -105,9 +117,17 @@ def buscar_noticias(tema, num_noticias=5):
             except Exception as e:
                 print(f"⚠️ Error al cerrar el driver de Selenium: {e}")
 
-    # Filtrar y ordenar los resultados (esto ya estaba bien)
-    ranked_articles = [a for a in ranked_articles if a.get('score', 0) >= 5]
-    ranked_articles.sort(key=lambda x: x.get('score', 0), reverse=True)
+    # Filtrar y ordenar los resultados
+    # Usar el parámetro min_score_fuente en lugar del valor hardcodeado 5
+    print(f"Filtrando artículos analizados con score >= {min_score_fuente}...")
+    valid_articles = [a for a in ranked_articles if a and isinstance(a.get('score'), (int, float)) and a.get('score', 0) >= min_score_fuente]
 
-    return ranked_articles[:num_noticias]
+    if not valid_articles:
+        print(f"ℹ️ No se encontraron artículos con score >= {min_score_fuente} después del análisis.")
+        return []
+
+    valid_articles.sort(key=lambda x: x.get('score', 0), reverse=True)
+
+    print(f"🏆 Retornando TOP {min(len(valid_articles), num_noticias)} artículos de {len(valid_articles)} válidos.")
+    return valid_articles[:num_noticias]
 
