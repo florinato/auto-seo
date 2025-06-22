@@ -3,74 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACI Mock Dashboard</title>
+    <title>ACI Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Custom styles to override or extend Tailwind if necessary */
         body {
             font-family: 'Roboto', sans-serif;
             line-height: 1.6;
-            margin: 0;
-            padding: 0;
             background-color: #f4f7f6;
             color: #333;
         }
         .container {
             max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
         }
         header {
             background-color: #0056b3;
             color: #fff;
-            padding: 15px 0;
-            text-align: center;
-            margin-bottom: 20px;
         }
-        header h1 {
-            margin: 0;
+        h1 {
             font-weight: 300;
         }
         .section {
             background-color: #fff;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         h2 {
             color: #0056b3;
-            margin-top: 0;
             border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
         }
-
-        /* Sección de Generación */
-        #generate-section form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .form-group {
+            display: flex;
+            flex-direction: column;
         }
-         #generate-section .form-group {
-             display: flex;
-             flex-direction: column;
-         }
-        #generate-section label {
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        #generate-section input[type="text"],
-        #generate-section select {
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 1em;
+            width: 100%; /* Ensure inputs take full width */
+            box-sizing: border-box; /* Include padding in width calculation */
         }
-         #generate-section input[type="text"].full-width {
-             grid-column: span 2; /* Tema ocupa dos columnas */
-         }
-        #generate-section button {
-            grid-column: span 2; /* Botón ocupa dos columnas */
+        textarea {
+            min-height: 80px; /* Default height for template inputs */
+            resize: vertical;
+        }
+        button {
             padding: 12px;
             background-color: #28a745;
             color: white;
@@ -80,353 +61,638 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        #generate-section button:hover {
+        button:hover {
             background-color: #218838;
-        }
-
-        /* Sección de Lista de Artículos */
-        #articles-list ul {
-            list-style: none;
-            padding: 0;
         }
         #articles-list li {
             background-color: #f9f9f9;
             border: 1px solid #eee;
-            border-radius: 4px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
-        #articles-list li .article-info {
-            flex-grow: 1;
-        }
-         #articles-list li h3 {
-             margin: 0 0 5px 0;
-             color: #007bff;
-             font-size: 1.1em;
-             border-bottom: none;
-             padding-bottom: 0;
-         }
-         #articles-list li p {
-             margin: 0;
-             font-size: 0.9em;
-             color: #555;
-         }
-        #articles-list li .article-actions a {
-            margin-left: 10px;
-            text-decoration: none;
+        #articles-list li h3 {
             color: #007bff;
         }
-         #articles-list li .article-actions a:hover {
-             text-decoration: underline;
-         }
-
-        /* Sección de Revisión/Edición (Simulada) */
+        #articles-list li .article-actions a {
+            color: #007bff;
+        }
+        #articles-list li .article-actions a:hover {
+            text-decoration: underline;
+        }
         #review-section {
-             /* Por defecto oculta, se mostraría al hacer clic en un artículo */
-             display: none; /* Ocultar por defecto */
+            display: none; /* Ocultar por defecto */
         }
-         #review-section .article-title-review {
-             font-family: 'Roboto', sans-serif; /* Usar fuente del body */
-             color: #333;
-             text-align: center;
-             margin-bottom: 20px;
-         }
-        #review-section .editor-area textarea {
-            width: 100%;
-            min-height: 400px;
-            padding: 10px;
+        .chat-log {
             border: 1px solid #ccc;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
             border-radius: 4px;
-            font-size: 1em;
-            margin-bottom: 15px;
-            box-sizing: border-box; /* Asegurar padding no aumenta el ancho */
         }
-         #review-section .image-preview-area {
-             text-align: center;
-             margin-bottom: 20px;
-         }
-         #review-section .image-preview-area img {
-             max-width: 300px; /* Tamaño fijo para la preview en el mock */
-             height: auto;
-             border: 1px solid #eee;
-             border-radius: 4px;
-             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-         }
-         #review-section .chat-area {
-             border-top: 1px solid #eee;
-             margin-top: 20px;
-             padding-top: 20px;
-         }
-         #review-section .chat-log {
-             border: 1px solid #ccc;
-             min-height: 150px;
-             max-height: 300px;
-             overflow-y: auto;
-             padding: 10px;
-             border-radius: 4px;
-             margin-bottom: 10px;
-         }
-         #review-section .chat-log div {
-             margin-bottom: 8px;
-         }
-         #review-section .chat-log .user-message {
-             text-align: right;
-             color: #007bff;
-         }
-         #review-section .chat-log .ai-message {
-             text-align: left;
-             color: #28a745;
-         }
-         #review-section .chat-input textarea {
-             width: 100%;
-             min-height: 60px;
-             padding: 10px;
-             border: 1px solid #ccc;
-             border-radius: 4px;
-             font-size: 1em;
-             box-sizing: border-box;
-             margin-bottom: 10px;
-         }
-         #review-section .chat-input button {
-             display: block;
-             width: 100%;
-             padding: 10px;
-             background-color: #007bff;
-             color: white;
-             border: none;
-             border-radius: 4px;
-             font-size: 1em;
-             cursor: pointer;
-             transition: background-color 0.3s ease;
-         }
-         #review-section .chat-input button:hover {
-             background-color: #0056b3;
-         }
-
-        /* Sección Explorar DB (Simulada) */
-        #explore-db-section ul {
-            list-style: disc;
-            padding-left: 20px;
+        .chat-log .user-message {
+            text-align: right;
+            color: #007bff;
         }
-        #explore-db-section li {
-             margin-bottom: 5px;
+        .chat-log .ai-message {
+            text-align: left;
+            color: #28a745;
         }
-        #explore-db-section li a {
-             color: #007bff;
-             text-decoration: none;
+        .chat-input button {
+            background-color: #007bff;
         }
-        #explore-db-section li a:hover {
-             text-decoration: underline;
-        }
-
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            #generate-section form {
-                grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
-            }
-             #generate-section input[type="text"].full-width,
-             #generate-section button {
-                 grid-column: span 1;
-             }
+        .chat-input button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
-<body>
-    <header>
-        <h1>Asistente de Contenido Inteligente (ACI)</h1>
+<body class="p-0 m-0">
+    <header class="p-4 text-center mb-5 rounded-b-lg">
+        <h1 class="text-3xl">Asistente de Contenido Inteligente (ACI)</h1>
     </header>
 
-    <div class="container">
+    <div class="container mx-auto px-4">
 
         <!-- Sección 1: Generar Artículo -->
-        <section id="generate-section" class="section">
-            <h2>Generar Nuevo Artículo</h2>
-            <form id="generate-form">
-                <div class="form-group full-width">
-                    <label for="topic">Tema:</label>
-                    <input type="text" id="topic" placeholder="Ej: Avances de la IA en medicina 2025" class="full-width">
+        <section id="generate-section" class="section p-5 mb-5 rounded-lg">
+            <h2 class="text-2xl mb-5 pb-2">Generar Nuevo Artículo</h2>
+            <div id="loading-generate" class="text-center text-blue-600 mb-4" style="display: none;">
+                Generando artículo... Por favor, espera. Esto puede tardar unos minutos.
+            </div>
+            <div id="error-generate" class="text-center text-red-600 mb-4" style="display: none;">
+                Error al generar el artículo. Por favor, revisa la consola del servidor.
+            </div>
+            <form id="generate-form" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="form-group md:col-span-2">
+                    <label for="tema">Tema:</label>
+                    <input type="text" id="tema" placeholder="Ej: Avances de la IA en medicina 2025" required>
                 </div>
+
                 <div class="form-group">
-                    <label for="length">Longitud:</label>
-                    <select id="length">
-                        <option value="short">Corta</option>
-                        <option value="medium" selected>Media</option>
-                        <option value="long">Larga</option>
+                    <label for="longitud_texto">Longitud Texto:</label>
+                    <select id="longitud_texto">
+                        <option value="corta">Corta</option>
+                        <option value="media" selected>Media</option>
+                        <option value="larga">Larga</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="tone">Tono:</label>
-                    <select id="tone">
+                    <label for="tono_texto">Tono Texto:</label>
+                    <select id="tono_texto">
                         <option value="neutral" selected>Neutral</option>
                         <option value="formal">Formal</option>
                         <option value="informal">Informal</option>
                         <option value="technical">Técnico</option>
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label for="num-sources"># Fuentes a Usar:</label>
-                    <input type="number" id="num-sources" value="3" min="1" max="10">
+                    <label for="min_score_fuente">Score Mínimo Fuente (Scraper):</label>
+                    <input type="number" id="min_score_fuente" value="5" min="1" max="10">
                 </div>
-                 <div class="form-group">
-                    <label for="min-score">Score Mínimo Fuente:</label>
-                    <input type="number" id="min-score" value="7" min="1" max="10">
+                <div class="form-group">
+                    <label for="num_fuentes_scraper"># Fuentes Scraper:</label>
+                    <input type="number" id="num_fuentes_scraper" value="10" min="1" max="50">
                 </div>
-                <button type="submit">Iniciar Generación Automática</button>
+                <div class="form-group">
+                    <label for="num_resultados_scraper"># Resultados Scraper a Guardar:</label>
+                    <input type="number" id="num_resultados_scraper" value="5" min="1" max="20">
+                </div>
+
+                <div class="form-group">
+                    <label for="min_score_generador">Score Mínimo Fuente (Generador):</label>
+                    <input type="number" id="min_score_generador" value="7" min="1" max="10">
+                </div>
+                <div class="form-group">
+                    <label for="num_fuentes_generador"># Fuentes Generador:</label>
+                    <input type="number" id="num_fuentes_generador" value="3" min="1" max="10">
+                </div>
+                <div class="form-group">
+                    <label for="num_imagenes_buscar"># Imágenes a Buscar:</label>
+                    <input type="number" id="num_imagenes_buscar" value="2" min="1" max="5">
+                </div>
+
+                <div class="form-group md:col-span-2">
+                    <label for="prompt_analyzer_template">Plantilla Prompt Analyzer (opcional):</label>
+                    <textarea id="prompt_analyzer_template" placeholder="Deja vacío para usar la plantilla por defecto"></textarea>
+                </div>
+                <div class="form-group md:col-span-2">
+                    <label for="prompt_generator_template">Plantilla Prompt Generator (opcional):</label>
+                    <textarea id="prompt_generator_template" placeholder="Deja vacío para usar la plantilla por defecto"></textarea>
+                </div>
+                <div class="form-group md:col-span-2">
+                    <label for="prompt_copilot_template">Plantilla Prompt Copilot (opcional):</label>
+                    <textarea id="prompt_copilot_template" placeholder="Deja vacío para usar la plantilla por defecto"></textarea>
+                </div>
+
+                <button type="button" id="trigger-generation" class="md:col-span-2">Generar Artículo</button>
             </form>
         </section>
 
-        <!-- Sección 2: Artículos Generados -->
-        <section id="articles-list" class="section">
-            <h2>Artículos Generados (Pendientes de Revisión)</h2>
-            <p id="loading-articles" style="display: none;">Cargando artículos...</p>
-            <ul id="generated-articles-list">
-                <!-- Ejemplo de artículo generado (esto se llenaría dinámicamente por Bolt) -->
-                <li>
-                    <div class="article-info">
-                        <h3>Ejemplo: Impacto de la IA en la Medicina Futura</h3>
-                        <p>Tema: IA en medicina | Generado: 2024-06-15 10:30 | Estado: Generado</p>
-                    </div>
-                    <div class="article-actions">
-                        <a href="#review-section" onclick="showReviewSection('ejemplo-id-1'); return false;">Revisar</a>
-                         <a href="#" onclick="alert('Simulando Publicar...'); return false;">Publicar</a>
-                         <a href="#" onclick="alert('Simulando Descargar HTML...'); return false;">Descargar HTML</a>
-                    </div>
-                </li>
-                 <li>
-                    <div class="article-info">
-                        <h3>Ejemplo: Tendencias en Robótica Educativa para 2025</h3>
-                        <p>Tema: Robótica educativa | Generado: 2024-06-15 09:15 | Estado: Generado</p>
-                    </div>
-                    <div class="article-actions">
-                        <a href="#review-section" onclick="showReviewSection('ejemplo-id-2'); return false;">Revisar</a>
-                         <a href="#" onclick="alert('Simulando Publicar...'); return false;">Publicar</a>
-                         <a href="#" onclick="alert('Simulando Descargar HTML...'); return false;">Descargar HTML</a>
-                    </div>
-                </li>
-                <!-- Más artículos aquí -->
-            </ul>
-            <p id="no-articles" style="display: none;">No hay artículos generados pendientes de revisión.</p>
+        <!-- Sección 5: Configuración del Tema -->
+        <section id="theme-config-section" class="section p-5 mb-5 rounded-lg">
+            <h2 class="text-2xl mb-5 pb-2">Configuración del Tema</h2>
+            <div class="form-group">
+                <label for="tema_config">Seleccionar Tema:</label>
+                <select id="tema_config">
+                    <!-- Opciones de tema se cargarán aquí dinámicamente -->
+                </select>
+            </div>
+            <div id="theme-config-form" style="display: none;">
+                <div class="form-group">
+                    <label for="min_score_fuente_config">Score Mínimo Fuente:</label>
+                    <input type="number" id="min_score_fuente_config" min="1" max="10">
+                </div>
+                <div class="form-group">
+                    <label for="num_fuentes_scraper_config"># Fuentes Scraper:</label>
+                    <input type="number" id="num_fuentes_scraper_config" min="1" max="50">
+                </div>
+                <div class="form-group">
+                    <label for="num_resultados_scraper_config"># Resultados Scraper a Guardar:</label>
+                    <input type="number" id="num_resultados_scraper_config" min="1" max="20">
+                </div>
+                <div class="form-group">
+                    <label for="min_score_generador_config">Score Mínimo Generador:</label>
+                    <input type="number" id="min_score_generador_config" min="1" max="10">
+                </div>
+                <div class="form-group">
+                    <label for="num_fuentes_generador_config"># Fuentes Generador:</label>
+                    <input type="number" id="num_fuentes_generador_config" min="1" max="10">
+                </div>
+                <div class="form-group">
+                    <label for="num_imagenes_buscar_config"># Imágenes a Buscar:</label>
+                    <input type="number" id="num_imagenes_buscar_config" min="1" max="5">
+                </div>
+                <div class="form-group">
+                    <label for="prompt_analyzer_template_config">Plantilla Prompt Analyzer (opcional):</label>
+                    <textarea id="prompt_analyzer_template_config"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="prompt_generator_template_config">Plantilla Prompt Generator (opcional):</label>
+                    <textarea id="prompt_generator_template_config"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="prompt_copilot_template_config">Plantilla Prompt Copilot (opcional):</label>
+                    <textarea id="prompt_copilot_template_config"></textarea>
+                </div>
+                <button type="button" id="save-theme-config-button">Guardar Configuración</button>
+            </div>
         </section>
 
-         <!-- Sección 3: Revisar/Editar Artículo (Simulada) -->
-        <section id="review-section" class="section">
-             <button onclick="hideReviewSection();" style="float: right; background-color: #ccc; color: #333; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">Cerrar</button>
-             <h2 class="article-title-review">Revisar Artículo: [Título del Artículo]</h2>
-             <p id="article-review-meta" style="text-align: center; color: #555; margin-bottom: 20px;">Tema: [Tema] | Generado: [Fecha]</p>
+        <!-- Sección 2: Artículos Generados -->
+        <section id="articles-list" class="section p-5 mb-5 rounded-lg">
+            <h2 class="text-2xl mb-5 pb-2">Artículos Generados (Pendientes de Revisión)</h2>
+            <p id="loading-articles" class="text-center text-blue-600 mb-4" style="display: none;">Cargando artículos...</p>
+            <p id="error-articles" class="text-center text-red-600 mb-4" style="display: none;">Error al cargar artículos.</p>
+            <ul id="generated-articles-list" class="list-none p-0">
+                <!-- Artículos se cargarán aquí dinámicamente -->
+            </ul>
+            <p id="no-articles" class="text-center text-gray-500" style="display: none;">No hay artículos generados pendientes de revisión.</p>
+        </section>
 
-             <div class="image-preview-area">
-                 <h3>Imagen Principal</h3>
-                 <img id="article-review-image" src="https://via.placeholder.com/300x200?text=Imagen+de+Ejemplo" alt="Imagen de ejemplo">
-                 <p style="font-size: 0.9em; color: #666; margin-top: 5px;">Foto por [Autor] en [Fuente]</p>
-                 <!-- Opcional: Galería de candidatos / Buscar Otra -->
-             </div>
+        <!-- Sección 3: Revisar/Editar Artículo -->
+        <section id="review-section" class="section p-5 mb-5 rounded-lg">
+            <button onclick="hideReviewSection();" class="float-right bg-gray-300 text-gray-800 px-3 py-1 border-none rounded-md cursor-pointer hover:bg-gray-400">Cerrar</button>
+            <h2 class="article-title-review text-2xl text-center mb-5 pb-2">Revisar Artículo: [Título del Artículo]</h2>
+            <p id="article-review-meta" class="text-center text-gray-600 mb-5 text-sm">Tema: [Tema] | Generado: [Fecha]</p>
 
-             <div class="editor-area">
-                 <h3>Contenido del Artículo (Editar)</h3>
-                 <!-- Aquí iría el editor, simulado con un textarea -->
-                 <textarea id="article-body-editor">
-## Introducción
+            <div class="image-preview-area text-center mb-5">
+                <h3 class="text-xl mb-2">Imagen Principal</h3>
+                <img id="article-review-image" src="https://placehold.co/300x200/cccccc/333333?text=Imagen+No+Disponible" alt="Imagen del artículo" class="max-w-xs h-auto border border-gray-200 rounded-md shadow-md mx-auto">
+                <p id="article-image-credit" class="text-sm text-gray-600 mt-2">Foto por [Autor] en [Fuente]</p>
+            </div>
 
-Este es un ejemplo de texto generado por la IA. Puedes editarlo directamente aquí.
+            <div class="editor-area mb-5">
+                <h3 class="text-xl mb-2">Contenido del Artículo (Editar)</h3>
+                <textarea id="article-body-editor" class="w-full min-h-96 p-3 border border-gray-300 rounded-md text-base mb-4"></textarea>
+                <button id="save-changes-button" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-colors">Guardar Cambios</button>
+            </div>
 
-### Subtítulo de Ejemplo
-
-Aquí hay más contenido.
-
-* Punto 1
-* Punto 2
-
-## Conclusión
-
-¡Fin del artículo de ejemplo!
-                 </textarea>
-                 <button onclick="alert('Simulando Guardar Cambios...');">Guardar Cambios</button>
-             </div>
-
-            <div class="chat-area">
-                <h3>Chat con Asistente IA</h3>
-                <div class="chat-log" id="ia-chat-log">
-                    <div class="ai-message">Asistente: ¡Hola! Estoy listo para ayudarte a revisar este artículo. ¿Tienes alguna pregunta o instrucción?</div>
-                    <!-- Mensajes de chat se añadirían aquí -->
+            <div class="chat-area border-t border-gray-200 pt-5 mt-5">
+                <h3 class="text-xl mb-2">Chat con Asistente IA</h3>
+                <div class="chat-log p-3 mb-3">
+                    <div class="ai-message text-sm mb-2">Asistente: ¡Hola! Estoy listo para ayudarte a revisar este artículo. ¿Tienes alguna pregunta o instrucción?</div>
+                    <!-- Mensajes de chat se añadirían aquí dinámicamente -->
                 </div>
                 <div class="chat-input">
-                    <textarea id="ia-chat-input" placeholder="Escribe tu mensaje a la IA..."></textarea>
-                    <button onclick="alert('Simulando Enviar Mensaje...');">Enviar a IA</button>
+                    <textarea id="ia-chat-input" placeholder="Escribe tu mensaje a la IA..." class="w-full min-h-20 p-3 border border-gray-300 rounded-md text-base mb-3"></textarea>
+                    <button id="send-chat-button" class="w-full">Enviar a IA</button>
                 </div>
             </div>
         </section>
 
-
         <!-- Sección 4: Explorar Base de Datos -->
-        <section id="explore-db-section" class="section">
-            <h2>Explorar Base de Datos</h2>
-            <ul>
-                <li><a href="#" onclick="alert('Simulando ver Fuentes Scrapeadas...'); return false;">Ver Fuentes Scrapeadas</a></li>
-                <li><a href="#" onclick="alert('Simulando ver Artículos Generados (Todos los Estados)...'); return false;">Ver Artículos Generados (Todos los Estados)</a></li>
-                <!-- Opcional: Ver imágenes, tags, etc. -->
+        <section id="explore-db-section" class="section p-5 mb-5 rounded-lg">
+            <h2 class="text-2xl mb-5 pb-2">Explorar Base de Datos</h2>
+            <ul class="list-disc pl-5">
+                <li><a href="#" id="view-sources-button" class="text-blue-500 hover:underline">Ver Fuentes Scrapeadas</a></li>
+                <li><a href="#" id="view-all-articles-button" class="text-blue-500 hover:underline">Ver Artículos Generados (Todos los Estados)</a></li>
+                <li><a href="#" id="view-temas-button" class="text-blue-500 hover:underline">Ver Temas/Secciones Disponibles</a></li>
             </ul>
         </section>
 
     </div>
 
     <script>
-        // Funcionalidad básica para mostrar/ocultar la sección de revisión
+        const API_BASE_URL = 'http://127.0.0.1:8000'; // Asegúrate de que esto coincide con tu backend
+
+        // Estado global para el artículo que se está revisando
+        let currentArticleId = null;
+
+        // --- Funciones para mostrar/ocultar secciones ---
         function showReviewSection(articleId) {
+            currentArticleId = articleId;
             document.getElementById('articles-list').style.display = 'none';
+            document.getElementById('explore-db-section').style.display = 'none';
+            document.getElementById('generate-section').style.display = 'none'; // Ocultar también la sección de generación
             document.getElementById('review-section').style.display = 'block';
-            // En la implementación real en Bolt, aquí cargarías los datos
-            // del artículo con el ID (articleId) usando el endpoint GET /articles/{articleId}
-            // y llenarías el título, texto del editor, imagen, etc.
-            document.querySelector('#review-section .article-title-review').innerText = 'Revisar Artículo: ' + (articleId === 'ejemplo-id-1' ? 'Impacto de la IA en la Medicina Futura' : 'Tendencias en Robótica Educativa para 2025');
-            document.getElementById('article-body-editor').value = 'Texto cargado para ' + articleId + '\n\nAquí iría el contenido real del artículo.';
-            // La imagen y metadata también se cargarían aquí
+            
+            // Cargar los detalles del artículo
+            loadArticleForReview(articleId);
         }
 
         function hideReviewSection() {
+            currentArticleId = null;
             document.getElementById('review-section').style.display = 'none';
             document.getElementById('articles-list').style.display = 'block';
+            document.getElementById('explore-db-section').style.display = 'block'; // Mostrar de nuevo si estaba oculta
+            document.getElementById('generate-section').style.display = 'block'; // Mostrar de nuevo si estaba oculta
+            fetchArticles(); // Volver a cargar la lista de artículos
         }
 
-        // Simulación de envío del formulario de generación
-        document.getElementById('generate-form').addEventListener('submit', function(event) {
-            event.preventDefault(); // Evitar que el formulario se envíe realmente
-            const topic = document.getElementById('topic').value;
-            const length = document.getElementById('length').value;
-            const tone = document.getElementById('tone').value;
-            const numSources = document.getElementById('num-sources').value;
-            const minScore = document.getElementById('min-score').value;
+        // --- Funciones de Interacción con la API ---
 
-            if (!topic) {
+        /**
+         * Realiza una solicitud fetch genérica a la API.
+         * @param {string} endpoint - El endpoint de la API (ej. '/articles').
+         * @param {string} method - El método HTTP (ej. 'GET', 'POST').
+         * @param {object} [body=null] - El cuerpo de la solicitud (para POST/PUT).
+         * @returns {Promise<object>} La respuesta parseada como JSON.
+         */
+        async function apiCall(endpoint, method, body = null) {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Error en la llamada a la API (${endpoint}):`, error);
+                throw error; // Re-lanzar para que el llamador pueda manejarlo
+            }
+        }
+
+        /**
+         * Carga los artículos generados desde la API y los muestra en la lista.
+         */
+        async function fetchArticles() {
+            const loadingIndicator = document.getElementById('loading-articles');
+            const errorIndicator = document.getElementById('error-articles');
+            const articlesListElem = document.getElementById('generated-articles-list');
+            const noArticlesElem = document.getElementById('no-articles');
+
+            articlesListElem.innerHTML = ''; // Limpiar lista
+            loadingIndicator.style.display = 'block';
+            errorIndicator.style.display = 'none';
+            noArticlesElem.style.display = 'none';
+
+            try {
+                const articles = await apiCall('/articles', 'GET');
+                if (articles && articles.length > 0) {
+                    articles.forEach(article => {
+                        const li = document.createElement('li');
+                        li.className = 'bg-gray-50 border border-gray-200 rounded-md p-4 mb-3 flex justify-between items-center shadow-sm';
+                        const generatedDate = article.fecha_generacion ? new Date(article.fecha_generacion).toLocaleString() : 'N/A';
+                        li.innerHTML = `
+                            <div class="article-info flex-grow">
+                                <h3 class="text-blue-700 text-lg font-semibold mb-1">${article.title || 'Artículo sin título'}</h3>
+                                <p class="text-gray-600 text-sm">Tema: ${article.tema || 'N/A'} | Generado: ${generatedDate} | Estado: ${article.estado || 'Desconocido'}</p>
+                            </div>
+                            <div class="article-actions ml-4 flex space-x-2">
+                                <a href="#review-section" class="text-blue-500 hover:text-blue-700 font-medium" onclick="showReviewSection(${article.id}); return false;">Revisar</a>
+                                <a href="#" class="text-green-500 hover:text-green-700 font-medium" onclick="publishArticle(${article.id}); return false;">Publicar</a>
+                                <a href="#" class="text-indigo-500 hover:text-indigo-700 font-medium" onclick="downloadHtml(${article.id}); return false;">Descargar HTML</a>
+                            </div>
+                        `;
+                        articlesListElem.appendChild(li);
+                    });
+                } else {
+                    noArticlesElem.style.display = 'block';
+                }
+            } catch (error) {
+                errorIndicator.style.display = 'block';
+                errorIndicator.innerText = `Error al cargar artículos: ${error.message}`;
+                console.error("Error fetching articles:", error);
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        /**
+         * Carga los detalles de un artículo específico para la sección de revisión.
+         * @param {number} articleId - El ID del artículo a cargar.
+         */
+        async function loadArticleForReview(articleId) {
+            const titleElem = document.querySelector('#review-section .article-title-review');
+            const metaElem = document.getElementById('article-review-meta');
+            const imageElem = document.getElementById('article-review-image');
+            const imageCreditElem = document.getElementById('article-image-credit');
+            const editorElem = document.getElementById('article-body-editor');
+            const chatLogElem = document.querySelector('#review-section .chat-log');
+
+            titleElem.innerText = 'Cargando...';
+            metaElem.innerText = '';
+            editorElem.value = 'Cargando contenido...';
+            imageElem.src = 'https://placehold.co/300x200/cccccc/333333?text=Cargando...';
+            imageCreditElem.innerText = 'Cargando...';
+            chatLogElem.innerHTML = `<div class="ai-message text-sm mb-2">Asistente: ¡Hola! Estoy listo para ayudarte a revisar este artículo. ¿Tienes alguna pregunta o instrucción?</div>`; // Reset chat log
+
+            try {
+                const article = await apiCall(`/articles/${articleId}`, 'GET');
+                if (article) {
+                    titleElem.innerText = `Revisar Artículo: ${article.title || 'Sin Título'}`;
+                    const generatedDate = article.fecha_generacion ? new Date(article.fecha_generacion).toLocaleString() : 'N/A';
+                    metaElem.innerText = `Tema: ${article.tema || 'N/A'} | Generado: ${generatedDate}`;
+                    editorElem.value = article.body || '';
+
+                    if (article.images && article.images.length > 0) {
+                        const mainImage = article.images[0];
+                        imageElem.src = mainImage.url || 'https://placehold.co/300x200/cccccc/333333?text=Imagen+No+Disponible';
+                        imageElem.alt = mainImage.alt_text || 'Imagen del artículo';
+                        imageCreditElem.innerText = `Foto por ${mainImage.photographer || 'Desconocido'} en ${mainImage.source || 'Desconocida'}`;
+                    } else {
+                        imageElem.src = 'https://placehold.co/300x200/cccccc/333333?text=Imagen+No+Disponible';
+                        imageCreditElem.innerText = 'No hay imagen disponible.';
+                    }
+
+                    // Populate chat history if available (assuming article.chat_history exists)
+                    if (article.chat_history && Array.isArray(article.chat_history)) {
+                        chatLogElem.innerHTML = ''; // Clear initial message
+                        article.chat_history.forEach(msg => {
+                            const msgDiv = document.createElement('div');
+                            msgDiv.className = msg.role === 'user' ? 'user-message text-sm mb-2' : 'ai-message text-sm mb-2';
+                            msgDiv.innerText = `${msg.role === 'user' ? 'Tú' : 'Asistente'}: ${msg.content}`;
+                            chatLogElem.appendChild(msgDiv);
+                        });
+                        chatLogElem.scrollTop = chatLogElem.scrollHeight; // Scroll to bottom
+                    } else {
+                        // Restore initial message if no chat history
+                        chatLogElem.innerHTML = `<div class="ai-message text-sm mb-2">Asistente: ¡Hola! Estoy listo para ayudarte a revisar este artículo. ¿Tienes alguna pregunta o instrucción?</div>`;
+                    }
+
+                } else {
+                    titleElem.innerText = 'Artículo no encontrado';
+                    editorElem.value = 'El artículo con el ID proporcionado no pudo ser cargado.';
+                    imageElem.src = 'https://placehold.co/300x200/cccccc/333333?text=Error';
+                    imageCreditElem.innerText = '';
+                }
+            } catch (error) {
+                console.error("Error loading article for review:", error);
+                titleElem.innerText = 'Error al cargar el artículo';
+                editorElem.value = `Hubo un problema al cargar el artículo: ${error.message}`;
+                imageElem.src = 'https://placehold.co/300x200/cccccc/333333?text=Error';
+                imageCreditElem.innerText = '';
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Botón Generar Artículo
+        document.getElementById('trigger-generation').addEventListener('click', async function() {
+            const loadingIndicator = document.getElementById('loading-generate');
+            const errorIndicator = document.getElementById('error-generate');
+
+            const tema = document.getElementById('tema').value;
+            if (!tema) {
                 alert("Por favor, ingresa un tema.");
                 return;
             }
 
-            // Aquí es donde Bolt llamaría a tu endpoint POST /generate
-            alert(`Simulando iniciar generación:\nTema: ${topic}\nLongitud: ${length}\nTono: ${tone}\nFuentes: ${numSources} (min score ${minScore})`);
+            const payload = {
+                tema: tema,
+                min_score_fuente: parseInt(document.getElementById('min_score_fuente').value),
+                num_fuentes_scraper: parseInt(document.getElementById('num_fuentes_scraper').value),
+                num_resultados_scraper: parseInt(document.getElementById('num_resultados_scraper').value),
+                min_score_generador: parseInt(document.getElementById('min_score_generador').value),
+                num_fuentes_generador: parseInt(document.getElementById('num_fuentes_generador').value),
+                longitud_texto: document.getElementById('longitud_texto').value,
+                tono_texto: document.getElementById('tono_texto').value,
+                num_imagenes_buscar: parseInt(document.getElementById('num_imagenes_buscar').value),
+                prompt_analyzer_template: document.getElementById('prompt_analyzer_template').value || null,
+                prompt_generator_template: document.getElementById('prompt_generator_template').value || null,
+                prompt_copilot_template: document.getElementById('prompt_copilot_template').value || null
+            };
+            console.log("Payload:", payload);
 
-            // Después de una simulación exitosa, podrías simular añadir un artículo a la lista
-            // Esto sería manejo de estado en Bolt en la implementación real
-            // console.log("Simulando añadir artículo a la lista...");
-            // const articlesList = document.getElementById('generated-articles-list');
-            // const newItem = document.createElement('li');
-            // newItem.innerHTML = `
-            //     <div class="article-info">
-            //         <h3>Nuevo Artículo: ${topic}</h3>
-            //         <p>Tema: ${topic} | Generado: ${new Date().toLocaleString()} | Estado: Generando...</p>
-            //     </div>
-            //     <div class="article-actions">
-            //         <a href="#" onclick="showReviewSection('simulated-id'); return false;">Revisar</a>
-            //          <a href="#" onclick="alert('Simulando Publicar...'); return false;">Publicar</a>
-            //          <a href="#" onclick="alert('Simulando Descargar HTML...'); return false;">Descargar HTML</a>
-            //     </div>
-            // `;
-            // articlesList.appendChild(newItem);
+            loadingIndicator.style.display = 'block';
+            errorIndicator.style.display = 'none';
+
+            try {
+                const result = await apiCall('/generate', 'POST', payload);
+                alert(`Generación completada! Artículo ID: ${result.article_id}`);
+                fetchArticles(); // Recargar la lista de artículos para ver el nuevo
+            } catch (error) {
+                errorIndicator.style.display = 'block';
+                errorIndicator.innerText = `Error de generación: ${error.message}. Revisa la consola del servidor.`;
+                console.error("Error during generation:", error);
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
         });
 
+        // Botón Guardar Cambios del Artículo
+        document.getElementById('save-changes-button').addEventListener('click', async function() {
+            if (!currentArticleId) {
+                alert("No hay un artículo seleccionado para guardar.");
+                return;
+            }
+            const updatedContent = document.getElementById('article-body-editor').value;
+            const payload = { body: updatedContent }; // Solo actualizamos el body por ahora
+
+            try {
+                await apiCall(`/articles/${currentArticleId}`, 'PUT', payload);
+                alert("Artículo actualizado con éxito!");
+            } catch (error) {
+                alert(`Error al guardar cambios: ${error.message}`);
+            }
+        });
+
+        // Botón Enviar Mensaje a IA
+        document.getElementById('send-chat-button').addEventListener('click', async function() {
+            const chatInput = document.getElementById('ia-chat-input');
+            const chatLog = document.querySelector('#review-section .chat-log');
+            const userMessage = chatInput.value.trim();
+
+            if (!userMessage) return;
+
+            // Add user message to chat log
+            const userMsgDiv = document.createElement('div');
+            userMsgDiv.className = 'user-message text-sm mb-2';
+            userMsgDiv.innerText = `Tú: ${userMessage}`;
+            chatLog.appendChild(userMsgDiv);
+            chatInput.value = '';
+            chatLog.scrollTop = chatLog.scrollHeight; // Scroll to bottom
+
+            try {
+                const payload = {
+                    user_message: userMessage,
+                    article_id: currentArticleId, // Pasa el ID del artículo como contexto
+                    // También podrías pasar el tema del artículo si lo tuvieras disponible aquí
+                };
+                const response = await apiCall('/chat', 'POST', payload);
+                const aiMsgDiv = document.createElement('div');
+                aiMsgDiv.className = 'ai-message text-sm mb-2';
+                aiMsgDiv.innerText = `Asistente: ${response.response}`;
+                chatLog.appendChild(aiMsgDiv);
+                chatLog.scrollTop = chatLog.scrollHeight; // Scroll to bottom
+            } catch (error) {
+                const errorMsgDiv = document.createElement('div');
+                errorMsgDiv.className = 'ai-message text-sm mb-2 text-red-500';
+                errorMsgDiv.innerText = `Asistente (Error): No pude responder. ${error.message}`;
+                chatLog.appendChild(errorMsgDiv);
+                chatLog.scrollTop = chatLog.scrollHeight; // Scroll to bottom
+            }
+        });
+
+        // Botones de Explorar Base de Datos (Manejo de Clics - ejemplo)
+        document.getElementById('view-sources-button').addEventListener('click', async function(event) {
+            event.preventDefault();
+            try {
+                const sources = await apiCall('/admin/sources', 'GET');
+                alert(`Total de fuentes scrapeadas: ${sources.length}\nPrimeras 3:\n${JSON.stringify(sources.slice(0, 3), null, 2)}`);
+                // En una app real, mostrarías esto en una tabla o modal.
+            } catch (error) {
+                alert(`Error al ver fuentes: ${error.message}`);
+            }
+        });
+
+        document.getElementById('view-all-articles-button').addEventListener('click', async function(event) {
+            event.preventDefault();
+            try {
+                const allArticles = await apiCall('/articles', 'GET');
+                alert(`Total de artículos (todos los estados): ${allArticles.length}\nPrimeros 3:\n${JSON.stringify(allArticles.slice(0, 3), null, 2)}`);
+            } catch (error) {
+                alert(`Error al ver todos los artículos: ${error.message}`);
+            }
+        });
+
+        document.getElementById('view-temas-button').addEventListener('click', async function(event) {
+            event.preventDefault();
+            try {
+                const temas = await apiCall('/temas-secciones', 'GET');
+                alert(`Temas/Secciones disponibles: ${temas.length}\n${JSON.stringify(temas, null, 2)}`);
+            } catch (error) {
+                alert(`Error al ver temas/secciones: ${error.message}`);
+            }
+        });
+
+        // Funciones para Publicar y Descargar (simuladas, puedes reemplazarlas)
+        function publishArticle(articleId) {
+            alert(`Simulando Publicar Artículo ID: ${articleId}`);
+            // Aquí llamarías a un endpoint de tu backend para publicar
+        }
+
+        function downloadHtml(articleId) {
+            alert(`Simulando Descargar HTML del Artículo ID: ${articleId}`);
+            // Aquí llamarías a un endpoint que te devuelva el HTML
+        }
+
+        // Cargar artículos al iniciar la página
+        document.addEventListener('DOMContentLoaded', fetchArticles);
+
+        // --- Configuración del Tema ---
+
+        // Cargar temas y llenar el selector
+        async function loadThemes() {
+            const temaConfigSelect = document.getElementById('tema_config');
+            try {
+                const temas = await apiCall('/temas-secciones', 'GET'); // Asumiendo que este endpoint existe
+                temas.forEach(tema => {
+                    const option = document.createElement('option');
+                    option.value = tema; // Asumiendo que el tema es una cadena
+                    option.text = tema;
+                    temaConfigSelect.appendChild(option);
+                });
+                // Cargar la configuración del primer tema por defecto
+                if (temas.length > 0) {
+                    loadThemeConfig(temas[0]);
+                }
+            } catch (error) {
+                console.error("Error al cargar los temas:", error);
+                // TODO: Mostrar un mensaje de error al usuario
+            }
+        }
+
+        // Cargar la configuración de un tema
+        async function loadThemeConfig(tema) {
+            const themeConfigForm = document.getElementById('theme-config-form');
+            try {
+                const config = await apiCall(`/config/${tema}`, 'GET');
+                document.getElementById('min_score_fuente_config').value = config.min_score_fuente;
+                document.getElementById('num_fuentes_scraper_config').value = config.num_fuentes_scraper;
+                document.getElementById('num_resultados_scraper_config').value = config.num_resultados_scraper;
+                document.getElementById('min_score_generador_config').value = config.min_score_generador;
+                document.getElementById('num_fuentes_generador_config').value = config.num_fuentes_generador;
+                document.getElementById('num_imagenes_buscar_config').value = config.num_imagenes_buscar;
+                document.getElementById('prompt_analyzer_template_config').value = config.prompt_analyzer_template || '';
+                document.getElementById('prompt_generator_template_config').value = config.prompt_generator_template || '';
+                document.getElementById('prompt_copilot_template_config').value = config.prompt_copilot_template || '';
+                themeConfigForm.style.display = 'block';
+            } catch (error) {
+                console.error("Error al cargar la configuración del tema:", error);
+                // TODO: Mostrar un mensaje de error al usuario
+                themeConfigForm.style.display = 'none'; // Ocultar el formulario si hay un error
+            }
+        }
+
+        // Guardar la configuración del tema
+        async function saveThemeConfig() {
+            const tema = document.getElementById('tema_config').value;
+            if (!tema) {
+                alert("Por favor, selecciona un tema.");
+                return;
+            }
+
+            const payload = {
+                min_score_fuente: parseInt(document.getElementById('min_score_fuente_config').value),
+                num_fuentes_scraper: parseInt(document.getElementById('num_fuentes_scraper_config').value),
+                num_resultados_scraper: parseInt(document.getElementById('num_resultados_scraper_config').value),
+                min_score_generador: parseInt(document.getElementById('min_score_generador_config').value),
+                num_fuentes_generador: parseInt(document.getElementById('num_fuentes_generador_config').value),
+                num_imagenes_buscar: parseInt(document.getElementById('num_imagenes_buscar_config').value),
+                prompt_analyzer_template: document.getElementById('prompt_analyzer_template_config').value || null,
+                prompt_generator_template: document.getElementById('prompt_generator_template_config').value || null,
+                prompt_copilot_template: document.getElementById('prompt_copilot_template_config').value || null
+            };
+
+            try {
+                await apiCall(`/config/${tema}`, 'PUT', payload);
+                alert("Configuración del tema guardada con éxito!");
+            } catch (error) {
+                alert(`Error al guardar la configuración del tema: ${error.message}`);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('tema_config').addEventListener('change', function() {
+            const tema = this.value;
+            if (tema) {
+                loadThemeConfig(tema);
+            }
+        });
+
+        document.getElementById('save-theme-config-button').addEventListener('click', saveThemeConfig);
+
+        // Cargar temas al iniciar la página
+        document.addEventListener('DOMContentLoaded', loadThemes);
     </script>
 </body>
 </html>
