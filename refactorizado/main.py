@@ -1,4 +1,3 @@
-# main.py
 # Punto de entrada principal. Orquesta el pipeline COMPLETO:
 # Búsqueda de fuentes -> Análisis -> Guardado de fuentes ->
 # Generación de contenido -> Búsqueda de imágenes -> Guardado de contenido generado y imágenes ->
@@ -10,6 +9,8 @@ import database
 import mock_publisher
 import scraper
 import web_tools
+
+# from refactorizado.api import app  # Importa la aplicación FastAPI - Eliminada porque no se usa
 
 # analyzer y llm_client son usados internamente por otros módulos
 
@@ -26,7 +27,7 @@ if __name__ == "__main__":
         exit(1)
 
     # Definir los temas para procesar
-    temas_a_procesar = [ "ultimas novedades en astronomia 2025"]
+    temas_a_procesar = [ "experiencias cercanas a la muerte impactantes",]
 
 
     # --- Procesar cada tema ---

@@ -6,7 +6,7 @@ import sqlite3
 from datetime import datetime
 
 # Define la ruta a tu archivo de esquema SQL
-SCHEMA_FILE_PATH = "C:\\Users\\oscar\\Desktop\\proyectospy\\auto-seo\\schema.sql" # <-- VERIFICA ESTA RUTA
+SCHEMA_FILE_PATH = "schema.sql"
 DB_FILE_PATH = "seo_autopilot.db"
 
 
@@ -586,6 +586,12 @@ def get_available_temas_secciones():
         return []
     finally:
         conn.close()
+
+def get_theme_config(tema):
+    """
+    Obtiene la configuración del tema especificado.
+    """
+    return get_config(tema)
 
 
 # Bloque __main__ para probar solo database.py

@@ -1,4 +1,3 @@
-# content_generator.py
 # Genera un artículo de blog optimizado para SEO basado en fuentes y busca imágenes.
 
 import json
@@ -10,6 +9,22 @@ import database
 import llm_client
 import mock_publisher
 import web_tools
+
+
+def clean_json_response(json_str):
+    """
+    Intenta corregir errores comunes en la respuesta JSON de la IA.
+    """
+    # Eliminar comas adicionales al final de objetos o arrays
+    json_str = re.sub(r',\s*([}\]])', r'\1', json_str)
+    # Reemplazar dobles comillas dentro de las claves o valores (si es necesario)
+    json_str = json_str.replace('\\"', '"')
+    # Eliminar saltos de línea y tabulaciones innecesarias
+    json_str = re.sub(r'\s+', ' ', json_str)
+    # Eliminar caracteres de control no válidos (excepto tab, newline, return)
+    regex_control_chars = r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\u2028\u2029]'
+    json_str = re.sub(regex_control_chars, '', json_str)
+    return json_str.strip()
 
 
 def generate_seo_content(topic, num_sources=3, min_score=7):
@@ -72,9 +87,10 @@ Utilizarás la información proporcionada en las siguientes {loaded_source_count
 1.  **Rol:** Actúa como un redactor experto que crea contenido de autoridad para un blog especializado.
 2.  **Tarea:** Escribe un artículo completo y bien estructurado sobre "{topic}".
 3.  **Originalidad:** El artículo debe ser 100% original, resultado de la síntesis y reescritura de las fuentes. Evita el plagio.
-4.  **Longitud:** Intenta que el cuerpo del artículo tenga una longitud razonable (ej: más de 600 palabras), cubriendo los puntos clave de las fuentes.
+4.  **Longitud:** Intenta que el cuerpo del artículo tenga una longitud razonable (ej: más de 1500 palabras), cubriendo los puntos clave de las fuentes.
 5.  **Estructura y Formato:**
     *   Presenta la salida **EXCLUSIVAMENTE** como un objeto JSON válido.
+    *   El objeto JSON DEBE ser válido y estar bien formado.
     *   El JSON debe tener las siguientes claves:
         *   `title`: Un título atractivo y optimizado para SEO (debe incluir la palabra clave principal "{topic}").
         *   `meta_description`: Una meta descripción concisa y persuasiva para motores de búsqueda (aprox. 150-160 caracteres), incluyendo la palabra clave principal.
@@ -104,13 +120,15 @@ Produce **SOLO** el objeto JSON. No añadas texto explicativo antes ni después 
             json_str = json_match.group(0)
             json_str = json_str.replace('```json', '').replace('```', '').strip()
 
-            # Regex para caracteres de control no válidos en JSON (excepto tab, newline, return)
-            # Incluye ASCII control (0-31 excepto 9,10,13), DEL (127), C1 control (128-159), Line/Paragraph Separator
-            regex_control_chars = r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\u2028\u2029]'
-            cleaned_json_str = re.sub(regex_control_chars, '', json_str)
+            cleaned_json_str = clean_json_response(json_str)
 
-
-            generated_data = json.loads(cleaned_json_str)
+            try:
+                generated_data = json.loads(cleaned_json_str)
+                print("✅ JSON cargado con éxito después de la limpieza.")
+            except json.JSONDecodeError as e:
+                print(f"❌ Error al parsear JSON después de la limpieza: {e}")
+                print(f"Cadena intentando parsear (limpia):\n{cleaned_json_str[:500]}...")
+                return None
 
             required_keys = ['title', 'meta_description', 'tags', 'body']
             if not all(key in generated_data for key in required_keys):
@@ -152,9 +170,9 @@ if __name__ == "__main__":
         exit(1)
 
     # Define el tema para probar. Asegúrate de tener fuentes sobre él con score >= min_score no usadas.
-    test_topic = "ultimas novedades en astronomia 2025"
+    test_topic = "experiencias cercanas a la muerte impactantes"
 
-    test_num_sources = 3
+    test_num_sources = 10
     test_min_score = 7
 
     generated_article = generate_seo_content(
@@ -202,12 +220,9 @@ if __name__ == "__main__":
         print("✅ Simulación de publicación completada.")
 
         # NOTA: En el flujo principal orquestado por main.py, aquí también llamarías
-        # a database.save_generated_article y luego a database.save_image_metadata
         # para guardar todo en la DB antes de marcar las fuentes como usadas.
 
     else:
         print("\n❌ La generación de contenido independiente falló. No se generará archivo HTML.")
 
     print("\n--- Fin de la prueba independiente del Generador ---")
-    
-    
